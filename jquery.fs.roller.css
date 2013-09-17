@@ -1,0 +1,40 @@
+/*
+ * Roller Plugin [Formtone Library]
+ * @author Ben Plum
+ * @version 0.0.1
+ *
+ * Copyright © 2013 Ben Plum <mr@benplum.com>
+ * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
+ */
+ 
+	.roller,
+	.roller .roller-viewport { position: relative; }
+	.roller .roller-canister { overflow: hidden; width: 99999px; 
+		-webkit-transition: none !important;
+		   -moz-transition: none !important;
+		    -ms-transition: none !important;
+		     -o-transition: none !important;
+		        transition: none !important;
+		-webkit-transform: translate(0px, 0px);
+		   -moz-transform: translate(0px, 0px);
+		    -ms-transform: translate(0px, 0px);
+		     -o-transform: translate(0px, 0px);
+		        transform: translate(0px, 0px);
+	}
+	.roller.animated .roller-canister { 
+		-webkit-transition: -webkit-transform 0.25s ease-out !important;
+		   -moz-transition:    -moz-transform 0.25s ease-out !important;
+		    -ms-transition:     -ms-transform 0.25s ease-out !important;
+		     -o-transition:      -o-transform 0.25s ease-out !important;
+		        transition: 		transform 0.25s ease-out !important;
+	}
+	.roller .roller-item { float: left; }
+	.roller .roller-controls,
+	.roller .roller-pagination { margin: 0; padding: 0; width: 100%; }
+	.roller .roller-controls span,
+	.roller .roller-pagination span { cursor: pointer; display: inline-block; overflow: hidden; text-indent: 110%; white-space: nowrap; }
+	.roller .roller-controls span.disabled,
+	.roller .roller-pagination span.disabled { cursor: default; }
+	.roller .roller-captions {  }
+	.roller .roller-caption { display: none; }
+	.roller .roller-caption.active { display: block; }
