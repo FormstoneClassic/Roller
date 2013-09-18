@@ -9,6 +9,7 @@
  
 	.roller,
 	.roller .roller-viewport { position: relative; }
+	.roller .roller-viewport { height: 100%; }
 	.roller .roller-canister { overflow: hidden; width: 99999px; 
 		-webkit-transition: none !important;
 		   -moz-transition: none !important;
