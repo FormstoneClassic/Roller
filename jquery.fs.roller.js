@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.1
+ * @version 0.0.2
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -39,7 +39,9 @@ if (jQuery) (function($) {
 							.off("resize.roller")
 							.off("reset.roller")
 							.off("touchstart");
+				
 				data.$pagination.html("");
+				
 				if (data.useMargin) {
 					data.$canister.css({ marginLeft: "0" });
 				} else {
@@ -114,7 +116,7 @@ if (jQuery) (function($) {
 	}
 	
 	// Build
-	function _build($roller) {
+	function _build($roller, opts) {
 		if (!$roller.data("roller")) {
 			var data = $.extend({}, {
 				$roller: $roller,
@@ -136,7 +138,7 @@ if (jQuery) (function($) {
 				guid: guidCount++,
 				breakWidth: parseInt($roller.data("max-width")) || Infinity,
 				enabled: false
-			}, options);
+			}, opts);
 			
 			data.totalImages = data.$images.length;
 			
@@ -365,7 +367,7 @@ if (jQuery) (function($) {
 		data.pageWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(true) : data.$roller.outerWidth(true);
 		data.itemWidth = data.$items.eq(0).outerWidth(true);
 		data.itemMargin = parseInt(data.$items.eq(0).css("margin-right"), 10);
-		data.perPage = Math.round(data.pageWidth / data.itemWidth);
+		data.perPage = Math.floor(data.pageWidth / data.itemWidth);
 		data.pageCount = Math.ceil(data.count / data.perPage) - 1;
 		
 		data.pageMove = data.itemWidth * data.perPage;
