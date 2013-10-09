@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.2
+ * @version 0.0.3
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -23,13 +23,19 @@
 		        transform: translate(0px, 0px);
 	}
 	.roller.animated .roller-canister { 
-		-webkit-transition: -webkit-transform 0.25s ease-out !important;
-		   -moz-transition:    -moz-transform 0.25s ease-out !important;
-		    -ms-transition:     -ms-transform 0.25s ease-out !important;
-		     -o-transition:      -o-transform 0.25s ease-out !important;
-		        transition: 		transform 0.25s ease-out !important;
+		-webkit-transition: -webkit-transform 0.5s ease-out !important;
+		   -moz-transition:    -moz-transform 0.5s ease-out !important;
+		    -ms-transition:     -ms-transform 0.5s ease-out !important;
+		     -o-transition:      -o-transform 0.5s ease-out !important;
+		        transition: 		transform 0.5s ease-out !important;
 	}
-	.roller .roller-item { float: left; }
+	.roller .roller-item { float: left; 
+		-webkit-transition: opacity 0.5s linear !important;
+		   -moz-transition: opacity 0.5s linear !important;
+		    -ms-transition: opacity 0.5s linear !important;
+		     -o-transition: opacity 0.5s linear !important;
+		        transition: opacity 0.5s linear !important;
+	}
 	.roller .roller-controls,
 	.roller .roller-pagination { margin: 0; padding: 0; width: 100%; }
 	.roller .roller-controls span,

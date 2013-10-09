@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.2
+ * @version 0.0.3
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -15,7 +15,7 @@ if (jQuery) (function($) {
 		autoTime: 8000,
 		auto: false,
 		customClass: "",
-		speed: 250,
+		duration: 250,
 		useMargin: false
 	};
 	
@@ -76,7 +76,7 @@ if (jQuery) (function($) {
 		resize: function(e) {
 			var data = $(e.delegateTarget).data("roller");
 			
-			_startTimer(data.autoTimer, Site.debounceTime, function() { _resize(data); });
+			data.autoTimer = _startTimer(data.autoTimer, Site.debounceTime, function() { _resize(data); });
 		},
 		
 		// Manual reset (if items change)
@@ -145,7 +145,7 @@ if (jQuery) (function($) {
 			pub.enable(data);
 			
 			if (data.auto) {
-				_startTimer(data.autoTimer, data.autoTime, function() { _autoAdvance(data); });
+				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { _autoAdvance(data); });
 			}
 			
 			if (data.totalImages > 0) {
@@ -179,7 +179,7 @@ if (jQuery) (function($) {
 		var data = e.data;
 		
 		_clearTimer(data.autoTimer);
-		_clearTimer(data.touchTimer);
+		//_clearTimer(data.touchTimer);
 		
 		if (!data.isAnimating) {
 			var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
@@ -217,7 +217,7 @@ if (jQuery) (function($) {
 			data.$canister.css({ transform: "translate3D("+newLeft+"px,0,0)" });
 		}
 		
-		_startTimer(data.touchTimer, 300, function() { _touchEnd(e); });
+		//data.autoTimer = _startTimer(data.touchTimer, 300, function() { _touchEnd(e); });
 	}
 	
 	// Handle touch end
@@ -229,7 +229,7 @@ if (jQuery) (function($) {
 			edge = data.pageWidth * 0.25,
 			index = data.index;
 		
-		_clearTimer(data.touchTimer);
+		//_clearTimer(data.touchTimer);
 			
 		Site.$window.off("touchmove", _touchMove)
 					.off("touchend", _touchEnd);
@@ -289,7 +289,7 @@ if (jQuery) (function($) {
 			data.$roller.addClass("animated");
 		}
 		
-		_clearTimer(data.touchTimer);
+		//_clearTimer(data.touchTimer);
 		
 		if (index < 0) {
 			index = 0;
@@ -338,7 +338,7 @@ if (jQuery) (function($) {
 		_updateControls(data);
 		
 		if (animate) {
-			_startTimer(data.autoTimer, data.speed, function() {
+			_startTimer(data.autoTimer, data.duration, function() {
 				data.isAnimating = false;
 				data.$roller.removeClass("animated");
 			});
@@ -365,15 +365,17 @@ if (jQuery) (function($) {
 		
 		data.count = data.$items.length;
 		data.pageWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(true) : data.$roller.outerWidth(true);
-		data.itemWidth = data.$items.eq(0).outerWidth(true);
-		data.itemMargin = parseInt(data.$items.eq(0).css("margin-right"), 10);
+		data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
+		data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
 		data.perPage = Math.floor(data.pageWidth / data.itemWidth);
 		data.pageCount = Math.ceil(data.count / data.perPage) - 1;
 		
 		data.pageMove = data.itemWidth * data.perPage;
 		data.maxWidth = data.itemWidth * data.count;
-		data.maxMove = -data.maxWidth + data.pageWidth + data.itemMargin;
-		if (data.maxMove > 0) data.maxMove = 0;
+		data.maxMove = -data.maxWidth + data.pageWidth/*  + data.itemMargin */;
+		if (data.maxMove > 0) {
+			data.maxMove = 0;
+		}
 		
 		// Reset Page Count
 		if (data.pageCount != "Infinity") {
@@ -399,7 +401,7 @@ if (jQuery) (function($) {
 	// Start Timer
 	function _startTimer(timer, time, func) {
 		_clearTimer(timer);
-		timer = setTimeout(func, time);
+		return setTimeout(func, time);
 	}
 	
 	// Clear timer
