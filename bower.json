@@ -1,0 +1,30 @@
+{
+	"name": "Roller",
+	"version": "0.0.4",
+	"description": "A jQuery plugin for simple content carousels. Part of the formstone library.",
+	"keywords": [
+		"javascript",
+		"jquery",
+		"carousel",
+		"rotate",
+		"ui",
+		"formstone",
+		"benplum"
+	],
+	"authors": [
+		"Ben Plum"
+	],
+	"license": "MIT",
+	"homepage": "http://www.benplum.com/formstone/roller/",
+	"main": [
+		"jquery.fs.roller.css",
+		"jquery.fs.roller.min.js"
+	],
+	"ignore": [
+		"*.json"
+	],
+	"dependencies": {
+		"jquery": ">= 1.7.0"
+	},
+	"devDependencies": {}
+}

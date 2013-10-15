@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.3
+ * @version 0.0.4
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -368,8 +368,10 @@ if (jQuery) (function($) {
 		data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
 		data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
 		data.perPage = Math.floor(data.pageWidth / data.itemWidth);
+		if (data.perPage < 1) {
+			data.perPage = 1;
+		}
 		data.pageCount = Math.ceil(data.count / data.perPage) - 1;
-		
 		data.pageMove = data.itemWidth * data.perPage;
 		data.maxWidth = data.itemWidth * data.count;
 		data.maxMove = -data.maxWidth + data.pageWidth/*  + data.itemMargin */;
