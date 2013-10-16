@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.5
+ * @version 0.0.6
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -38,7 +38,7 @@ if (jQuery) (function($) {
 							.off("click.roller")
 							.off("resize.roller")
 							.off("reset.roller")
-							.off("touchstart");
+							.off("touchstart.roller");
 				
 				data.$pagination.html("");
 				
@@ -61,7 +61,7 @@ if (jQuery) (function($) {
 							.on("resize.roller", data, pub.resize)
 							.on("reset.roller", data, pub.reset)
 							.on("respond.roller", data, pub.respond)
-							.on("touchstart", data, _touchStart)
+							.on("touchstart.roller", data, _touchStart)
 						 	.trigger("resize.roller");
 			}
 			data.enabled = true;
@@ -132,7 +132,8 @@ if (jQuery) (function($) {
 				$images: $roller.find("img"),
 				isAnimating: false,
 				index: -1,
-				delta: 0,
+				deltaX: null,
+				deltaY: null,
 				leftPosition: 0,
 				xStart: 0,
 				guid: guidCount++,
@@ -173,19 +174,22 @@ if (jQuery) (function($) {
 	
 	// Handle touch start
 	function _touchStart(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		
 		var data = e.data;
 		
+		if ($(e.target).hasClass("roller-control") || $(e.target).hasClass("roller-page")) {
+			return;
+		}
+		
 		_clearTimer(data.autoTimer);
-		//_clearTimer(data.touchTimer);
+		
+		data.startEvent = e;
 		
 		if (!data.isAnimating) {
 			var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 			data.xStart = (touch) ? touch.pageX : e.clientX;
-			Site.$window.on("touchmove", data, _touchMove)
-						.one("touchend", data, _touchEnd);
+			data.yStart = (touch) ? touch.pageY : e.clientY;
+			Site.$window.on("touchmove.roller", data, _touchMove)
+						.one("touchend.roller", data, _touchEnd);
 		}
 	}
 	
@@ -194,16 +198,26 @@ if (jQuery) (function($) {
 		var data = e.data,
 			touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 		
-		data.delta = data.xStart - ((touch) ? touch.pageX : e.clientX);
+		data.deltaX = data.xStart - ((touch) ? touch.pageX : e.clientX);
+		data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
 		
 		// Only prevent event if trying to swipe
-		if (data.delta > 20) {
+		var deltaXCheck = (data.deltaX < 0) ? -data.deltaX : data.deltaX,
+			deltaYCheck = (data.deltaY < 0) ? -data.deltaY : data.deltaY;
+		
+		
+		if (deltaYCheck < 20 && data.startEvent) {
+			data.startEvent.preventDefault();
+			data.startEvent.stopPropagation();
+			data.startEvent = null;
+		}
+		
+		if (deltaXCheck > 10) {
 			e.preventDefault();
 			e.stopPropagation();
 		}
 		
-		var newLeft = data.leftPosition - data.delta;
-		
+		var newLeft = data.leftPosition - data.deltaX;
 		if (newLeft > 0) {
 			newLeft = 0;
 		}
@@ -216,8 +230,6 @@ if (jQuery) (function($) {
 		} else {
 			data.$canister.css({ transform: "translate3D("+newLeft+"px,0,0)" });
 		}
-		
-		//data.autoTimer = _startTimer(data.touchTimer, 300, function() { _touchEnd(e); });
 	}
 	
 	// Handle touch end
@@ -229,18 +241,18 @@ if (jQuery) (function($) {
 			edge = data.pageWidth * 0.25,
 			index = data.index;
 		
-		//_clearTimer(data.touchTimer);
-			
-		Site.$window.off("touchmove", _touchMove)
-					.off("touchend", _touchEnd);
+		data.startEvent = null;
 		
-		if (data.delta) {
-			if (data.delta > edge || data.delta < -edge) {
-				index = data.index + (((data.leftPosition-data.delta) <= data.leftPosition) ? 1 : -1);
+		Site.$window.off("touchmove.roller")
+					.off("touchend.roller");
+		
+		if (data.deltaX) {
+			if (data.deltaX > edge || data.deltaX < -edge) {
+				index = data.index + (((data.leftPosition - data.deltaX) <= data.leftPosition) ? 1 : -1);
 			}
 			
 			_position(data, index, true);
-			data.delta = null;
+			data.deltaX = null;
 		}
 	}
 	

@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.5
+ * @version 0.0.6
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -50,3 +50,13 @@
 	.roller .roller-captions {  }
 	.roller .roller-caption { display: none; }
 	.roller .roller-caption.active { display: block; }
+	
+	@media screen and (max-width: 740px) {
+		.roller * {
+			-webkit-user-select: none;
+			   -moz-user-select: none;
+			    -ms-user-select: none;
+			     -o-user-select: none;
+			        user-select: none;
+		}
+	}
