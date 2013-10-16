@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.4
+ * @version 0.0.5
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -388,11 +388,11 @@ if (jQuery) (function($) {
 			data.$pagination.html(html);
 		}
 		if (data.pageCount < 1) {
-			data.$controls.addClass("hidden");
-			data.$pagination.addClass("hidden");
+			data.$controls.removeClass("visible");
+			data.$pagination.removeClass("visible");
 		} else {
-			data.$controls.removeClass("hidden");
-			data.$pagination.removeClass("hidden");
+			data.$controls.addClass("visible");
+			data.$pagination.addClass("visible");
 		}
 		data.$paginationItems = data.$roller.find(".roller-page");
 		
