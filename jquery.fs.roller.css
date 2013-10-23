@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.6
+ * @version 0.0.7
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -29,7 +29,7 @@
 		     -o-transition:      -o-transform 0.5s ease-out !important;
 		        transition: 		transform 0.5s ease-out !important;
 	}
-	.roller .roller-item { float: left; 
+	.roller .roller-item { float: left;
 		-webkit-transition: opacity 0.5s linear !important;
 		   -moz-transition: opacity 0.5s linear !important;
 		    -ms-transition: opacity 0.5s linear !important;
@@ -52,11 +52,5 @@
 	.roller .roller-caption.active { display: block; }
 	
 	@media screen and (max-width: 740px) {
-		.roller * {
-			-webkit-user-select: none;
-			   -moz-user-select: none;
-			    -ms-user-select: none;
-			     -o-user-select: none;
-			        user-select: none;
-		}
+		.roller .roller-item { -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
 	}

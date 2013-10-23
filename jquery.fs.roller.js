@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 0.0.6
+ * @version 0.0.7
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -15,7 +15,7 @@ if (jQuery) (function($) {
 		autoTime: 8000,
 		auto: false,
 		customClass: "",
-		duration: 250,
+		duration: 500,
 		useMargin: false
 	};
 	
@@ -182,6 +182,7 @@ if (jQuery) (function($) {
 		
 		_clearTimer(data.autoTimer);
 		
+		data.startTime = new Date().getTime();
 		data.startEvent = e;
 		
 		if (!data.isAnimating) {
@@ -189,7 +190,8 @@ if (jQuery) (function($) {
 			data.xStart = (touch) ? touch.pageX : e.clientX;
 			data.yStart = (touch) ? touch.pageY : e.clientY;
 			Site.$window.on("touchmove.roller", data, _touchMove)
-						.one("touchend.roller", data, _touchEnd);
+						.one("touchend.roller", data, _touchEnd)
+						.one("touchcancel.roller", data, _touchEnd);
 		}
 	}
 	
@@ -202,17 +204,15 @@ if (jQuery) (function($) {
 		data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
 		
 		// Only prevent event if trying to swipe
-		var deltaXCheck = (data.deltaX < 0) ? -data.deltaX : data.deltaX,
-			deltaYCheck = (data.deltaY < 0) ? -data.deltaY : data.deltaY;
+		data.deltaXCheck = (data.deltaX < 0) ? -data.deltaX : data.deltaX;
+		data.deltaYCheck = (data.deltaY < 0) ? -data.deltaY : data.deltaY;
 		
-		
-		if (deltaYCheck < 20 && data.startEvent) {
+		if (data.deltaYCheck < 20 && data.startEvent) {
 			data.startEvent.preventDefault();
 			data.startEvent.stopPropagation();
 			data.startEvent = null;
 		}
-		
-		if (deltaXCheck > 10) {
+		if (data.deltaXCheck > 10) {
 			e.preventDefault();
 			e.stopPropagation();
 		}
@@ -234,17 +234,22 @@ if (jQuery) (function($) {
 	
 	// Handle touch end
 	function _touchEnd(e) {
-		e.preventDefault();
-		e.stopPropagation();
-		
 		var data = e.data,
 			edge = data.pageWidth * 0.25,
 			index = data.index;
 		
+		data.endTime = new Date().getTime();
+		
+		if (data.endTime - data.startTime > 200 && (data.deltaXCheck > 20 || data.deltaYCheck > 20)) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+		
 		data.startEvent = null;
 		
 		Site.$window.off("touchmove.roller")
-					.off("touchend.roller");
+					.off("touchend.roller")
+					.off("touchcancle.roller");
 		
 		if (data.deltaX) {
 			if (data.deltaX > edge || data.deltaX < -edge) {
