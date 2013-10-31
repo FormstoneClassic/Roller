@@ -1,6 +1,6 @@
 {
 	"name": "Roller",
-	"version": "0.0.7",
+	"version": "1.0.0",
 	"description": "A jQuery plugin for simple content carousels. Part of the formstone library.",
 	"keywords": [
 		"javascript",

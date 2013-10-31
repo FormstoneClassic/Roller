@@ -16,6 +16,7 @@ if (jQuery) (function($) {
 		auto: false,
 		customClass: "",
 		duration: 500,
+		paged: false,
 		useMargin: false
 	};
 	
@@ -33,7 +34,7 @@ if (jQuery) (function($) {
 			if (data.enabled) {
 				_clearTimer(data.autoTimer);
 				
-				data.$roller.removeClass("initialized")
+				data.$roller.removeClass("roller roller-initialized")
 							.off("click.roller")
 							.off("click.roller")
 							.off("resize.roller")
@@ -56,6 +57,7 @@ if (jQuery) (function($) {
 		enable: function(data) {
 			if (!data.enabled) {
 				data.$roller.data("roller", data)
+							.addClass("roller")
 							.on("click.roller", ".roller-control", _advance)
 							.on("click.roller", ".roller-page", _select)
 							.on("resize.roller", data, pub.resize)
@@ -136,6 +138,7 @@ if (jQuery) (function($) {
 				deltaY: null,
 				leftPosition: 0,
 				xStart: 0,
+				yStart: 0,
 				guid: guidCount++,
 				breakWidth: parseInt($roller.data("max-width")) || Infinity,
 				enabled: false
@@ -235,7 +238,7 @@ if (jQuery) (function($) {
 	// Handle touch end
 	function _touchEnd(e) {
 		var data = e.data,
-			edge = data.pageWidth * 0.25,
+			edge = data.viewportWidth * 0.25,
 			index = data.index;
 		
 		data.endTime = new Date().getTime();
@@ -306,22 +309,23 @@ if (jQuery) (function($) {
 			data.$roller.addClass("animated");
 		}
 		
-		//_clearTimer(data.touchTimer);
-		
 		if (index < 0) {
 			index = 0;
 		}
-		
 		if (index > data.pageCount) {
 			index = data.pageCount;
 		}
 		
-		var newLeft = -(index * data.pageMove);
-		if (newLeft < data.maxMove) { 
-			newLeft = data.maxMove; 
+		if (data.paged) {
+			var offset = data.$items.eq(index).position();
+			data.leftPosition = -offset.left;
+		} else {
+			data.leftPosition = -(index * data.pageMove);
 		}
 		
-		data.leftPosition = newLeft;
+		if (data.leftPosition < data.maxMove) { 
+			data.leftPosition = data.maxMove; 
+		}
 		
 		if (data.useMargin) {
 			data.$canister.css({ marginLeft: data.leftPosition });
@@ -341,7 +345,7 @@ if (jQuery) (function($) {
 		data.$items.removeClass("visible");
 		if (data.perPage != "Infinity") {
 			for (var i = 0; i < data.perPage; i++) {
-				if (newLeft == data.maxMove) {
+				if (data.leftPosition == data.maxMove) {
 					data.$items.eq(data.count - 1 - i).addClass("visible");
 				} else {
 					data.$items.eq((data.perPage * index) + i).addClass("visible");
@@ -370,7 +374,7 @@ if (jQuery) (function($) {
 			data.$controlItems.removeClass("disabled");
 			if (data.index <= 0) {
 				data.$controlItems.filter(".previous").addClass("disabled");
-			} else if (data.index >= data.pageCount) {
+			} else if (data.index >= data.pageCount || data.leftPosition == data.maxMove) {
 				data.$controlItems.filter(".next").addClass("disabled");
 			}
 		}
@@ -378,20 +382,31 @@ if (jQuery) (function($) {
 	
 	// Handle resize
 	function _resize(data) {
-		data.$roller.addClass("initialized");
+		data.$roller.addClass("roller-initialized");
 		
 		data.count = data.$items.length;
-		data.pageWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(true) : data.$roller.outerWidth(true);
-		data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
-		data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
-		data.perPage = Math.floor(data.pageWidth / data.itemWidth);
-		if (data.perPage < 1) {
+		data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(true) : data.$roller.outerWidth(true);
+		
+		if (data.paged) {
+			data.maxWidth = 0;
+			for (var i = 0; i < data.count; i++) {
+				data.maxWidth += data.$items.eq(i).outerWidth(false);
+			}
 			data.perPage = 1;
+			data.pageCount = (data.maxWidth > data.viewportWidth) ? data.count - 1 : 0;
+		} else {
+			data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
+			data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
+			data.perPage = Math.floor(data.viewportWidth / data.itemWidth);
+			if (data.perPage < 1) {
+				data.perPage = 1;
+			}
+			data.pageCount = Math.ceil(data.count / data.perPage) - 1;
+			data.pageMove = data.itemWidth * data.perPage;
+			data.maxWidth = data.itemWidth * data.count;
 		}
-		data.pageCount = Math.ceil(data.count / data.perPage) - 1;
-		data.pageMove = data.itemWidth * data.perPage;
-		data.maxWidth = data.itemWidth * data.count;
-		data.maxMove = -data.maxWidth + data.pageWidth/*  + data.itemMargin */;
+		
+		data.maxMove = -data.maxWidth + data.viewportWidth;
 		if (data.maxMove > 0) {
 			data.maxMove = 0;
 		}
@@ -413,7 +428,7 @@ if (jQuery) (function($) {
 		}
 		data.$paginationItems = data.$roller.find(".roller-page");
 		
-		var index = -Math.ceil(data.leftPosition / data.pageWidth);
+		var index = -Math.ceil(data.leftPosition / data.viewportWidth);
 		_position(data, index, false);
 	}
 	
