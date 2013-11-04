@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -10,7 +10,7 @@
 	.roller,
 	.roller .roller-viewport { position: relative; }
 	.roller .roller-viewport { height: 100%; }
-	.roller .roller-canister { overflow: hidden; width: 99999px; 
+	.roller .roller-canister { overflow: hidden; position: relative; width: 99999px;
 		-webkit-transition: none !important;
 		   -moz-transition: none !important;
 		    -ms-transition: none !important;

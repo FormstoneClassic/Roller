@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.0.0
+ * @version 1.1.0
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -16,6 +16,7 @@ if (jQuery) (function($) {
 		auto: false,
 		customClass: "",
 		duration: 500,
+		debounce: 10,
 		paged: false,
 		useMargin: false
 	};
@@ -29,76 +30,65 @@ if (jQuery) (function($) {
 			return $(this);
 		},
 		
+		// Destroy Roller
+		destroy: function() {
+			return $(this);
+		},
+		
 		// Disable instance
-		disable: function(data) {
-			if (data.enabled) {
-				_clearTimer(data.autoTimer);
+		disable: function() {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
 				
-				data.$roller.removeClass("roller roller-initialized")
-							.off("click.roller")
-							.off("click.roller")
-							.off("resize.roller")
-							.off("reset.roller")
-							.off("touchstart.roller");
-				
-				data.$pagination.html("");
-				
-				if (data.useMargin) {
-					data.$canister.css({ marginLeft: "0" });
-				} else {
-					data.$canister.css({ transform: "translate3D(0,0,0)" });
+				if (data.enabled) {
+					_clearTimer(data.autoTimer);
+					
+					data.$roller.removeClass("roller roller-initialized")
+								.off("click.roller")
+								.off("click.roller")
+								.off("resize.roller")
+								.off("reset.roller")
+								.off("touchstart.roller");
+					
+					data.$pagination.html("");
+					
+					if (data.useMargin) {
+						data.$canister.css({ marginLeft: "0" });
+					} else {
+						data.$canister.css({ transform: "translate3D(0,0,0)" });
+					}
+					data.index = 0;
 				}
-				data.index = 0;
-			}
-			data.enabled = false;
+				data.enabled = false;
+			});
 		},
 		
 		// Enable instance
-		enable: function(data) {
-			if (!data.enabled) {
-				data.$roller.data("roller", data)
-							.addClass("roller")
-							.on("click.roller", ".roller-control", _advance)
-							.on("click.roller", ".roller-page", _select)
-							.on("resize.roller", data, pub.resize)
-							.on("reset.roller", data, pub.reset)
-							.on("respond.roller", data, pub.respond)
-							.on("touchstart.roller", data, _touchStart)
-						 	.trigger("resize.roller");
-			}
-			data.enabled = true;
+		enable: function() {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+				
+				if (!data.enabled) {
+					data.$roller.data("roller", data)
+								.addClass("roller")
+								.on("click.roller", ".roller-control", _advance)
+								.on("click.roller", ".roller-page", _select)
+								.on("resize.roller", data, _resize)
+								.on("reset.roller", data, _reset)
+								.on("respond.roller", data, _respond)
+								.on("touchstart.roller", data, _touchStart)
+							 	.trigger("resize.roller");
+				}
+				data.enabled = true;
+			});
 		},
 		
-		// Manual jump
-		jump: function(data, index, animated) {
-			_position(data, index, animated || true);
-		},
-		
-		// Manual resize
-		resize: function(e) {
-			var data = $(e.delegateTarget).data("roller");
-			
-			data.autoTimer = _startTimer(data.autoTimer, Site.debounceTime, function() { _resize(data); });
-		},
-		
-		// Manual reset (if items change)
-		reset: function(e) {
-			var data = $(e.delegateTarget).data("roller");
-			data.$itemsAll = data.$roller.find(".roller_item");
-			data.$items = data.$allItems.filter(":visible");
-			data.$roller.trigger("resize.roller");
-			_position(data, data.index, false);
-		},
-		
-		// Manual respond (for breakpoints)
-		respond: function(e) {
-			var data = $(e.delegateTarget).data("roller");
-			
-			if (data.breakWidth >= Site.minWidth) {
-				pub.enable(data);
-			} else {
-				pub.disable(data);
-			}
+		// Jump pages
+		jump: function(index, animated) {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+				_position(data, index-1, (typeof animated != "undefined") ? animated : true);
+			});
 		}
 	};
 	
@@ -114,6 +104,7 @@ if (jQuery) (function($) {
 		for (var i = 0, count = $items.length; i < count; i++) {
 			_build($items.eq(i), opts);
 		}
+		
 		return $items;
 	}
 	
@@ -146,7 +137,9 @@ if (jQuery) (function($) {
 			
 			data.totalImages = data.$images.length;
 			
-			pub.enable(data);
+			$roller.data("roller", data);
+			
+			pub.enable.apply(data.$roller);
 			
 			if (data.auto) {
 				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { _autoAdvance(data); });
@@ -290,7 +283,7 @@ if (jQuery) (function($) {
 		}
 	}
 	
-	// Select / Jump
+	// Select
 	function _select(e) {
 		e.preventDefault();
 		e.stopPropagation();
@@ -381,7 +374,17 @@ if (jQuery) (function($) {
 	}
 	
 	// Handle resize
-	function _resize(data) {
+	function _resize(e) {
+		var data = e.data;
+		data.autoTimer = _startTimer(data.autoTimer, data.debounce, function() { 
+			_doResize(data); 
+		});
+		
+		return data.$roller;
+	}
+	
+	// Do resize
+	function _doResize(data) {
 		data.$roller.addClass("roller-initialized");
 		
 		data.count = data.$items.length;
@@ -430,6 +433,25 @@ if (jQuery) (function($) {
 		
 		var index = -Math.ceil(data.leftPosition / data.viewportWidth);
 		_position(data, index, false);
+	}
+	
+	// Handle reset
+	function _reset(e) {
+		var data = e.data;
+		data.$items = data.$roller.find(".roller-item");
+		
+		_doResize(data);
+		_position(data, data.index, false);
+	}
+	
+	// Handle respond
+	function _respond(e) {
+		var data = e.data;
+		if (data.breakWidth >= Site.minWidth) {
+			pub.enable.apply(data.$roller);
+		} else {
+			pub.disable.apply(data.$roller);
+		}
 	}
 	
 	// Start Timer
