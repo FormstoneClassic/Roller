@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.2.0
+ * @version 1.2.1
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -50,7 +50,8 @@ if (jQuery) (function($) {
 					data.$roller.removeClass("roller roller-initialized")
 								.off("touchstart.roller click.roller resize.roller reset.roller");
 					
-					data.$canister.off("touchstart.roller");
+					data.$canister.css({ width: "" })
+								  .off("touchstart.roller");
 					
 					data.$pagination.html("");
 					
@@ -59,6 +60,7 @@ if (jQuery) (function($) {
 					} else {
 						data.$canister.css(_translate3D(0));
 					}
+					
 					data.index = 0;
 				}
 				
