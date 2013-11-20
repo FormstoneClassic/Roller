@@ -1,23 +1,27 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
 
 if (jQuery) (function($) {
-	var guidCount = 0;
+	var guidCount = 0,
+		$window = $(window);
 	
 	// Default Options
 	var options = {
 		autoTime: 8000,
 		auto: false,
+		breakWidth: 0,
 		customClass: "",
-		duration: 500,
+		duration: 510,
 		debounce: 10,
+		initOnload: true,
 		paged: false,
+		touchPaged: true,
 		useMargin: false
 	};
 	
@@ -44,21 +48,20 @@ if (jQuery) (function($) {
 					_clearTimer(data.autoTimer);
 					
 					data.$roller.removeClass("roller roller-initialized")
-								.off("click.roller")
-								.off("click.roller")
-								.off("resize.roller")
-								.off("reset.roller")
-								.off("touchstart.roller");
+								.off("touchstart.roller click.roller resize.roller reset.roller");
+					
+					data.$canister.off("touchstart.roller");
 					
 					data.$pagination.html("");
 					
 					if (data.useMargin) {
-						data.$canister.css({ marginLeft: "0" });
+						data.$canister.css({ marginLeft: "" });
 					} else {
-						data.$canister.css({ transform: "translate3D(0,0,0)" });
+						data.$canister.css(_translate3D(0));
 					}
 					data.index = 0;
 				}
+				
 				data.enabled = false;
 			});
 		},
@@ -71,14 +74,15 @@ if (jQuery) (function($) {
 				if (!data.enabled) {
 					data.$roller.data("roller", data)
 								.addClass("roller")
-								.on("click.roller", ".roller-control", _advance)
-								.on("click.roller", ".roller-page", _select)
+								.on("touchstart.roller click.roller", ".roller-control", data, _advance)
+								.on("touchstart.roller click.roller", ".roller-page", data, _select)
 								.on("resize.roller", data, _resize)
 								.on("reset.roller", data, _reset)
-								.on("respond.roller", data, _respond)
-								.on("touchstart.roller", data, _touchStart)
-							 	.trigger("resize.roller");
+								.trigger("resize.roller");
+					
+					data.$canister.on("touchstart.roller", data, _touchStart);
 				}
+				
 				data.enabled = true;
 			});
 		},
@@ -131,15 +135,21 @@ if (jQuery) (function($) {
 				xStart: 0,
 				yStart: 0,
 				guid: guidCount++,
-				breakWidth: parseInt($roller.data("max-width")) || Infinity,
+				breakWidth: parseInt($roller.data("roller-break-width"), 10) || opts.breakWidth,
 				enabled: false
 			}, opts);
 			
 			data.totalImages = data.$images.length;
 			
-			$roller.data("roller", data);
+			$roller.data("roller", data)
+				   .on("respond.roller", data, _respond);
 			
-			pub.enable.apply(data.$roller);
+			if (data.initOnload) {
+				pub.enable.apply(data.$roller);
+			}
+			
+			// Rubberband support??
+			//$(window).on("snap", data, _respond);
 			
 			if (data.auto) {
 				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { _autoAdvance(data); });
@@ -165,96 +175,106 @@ if (jQuery) (function($) {
 		if (data.loadedImages == data.totalImages) {
 			data.$roller.trigger("resize.roller");
 		}
-		data.$roller.data("roller", data);
+		//data.$roller.data("roller", data);
 	}
 	
 	// Handle touch start
 	function _touchStart(e) {
+		e.stopPropagation();
+		
 		var data = e.data;
 		
-		if ($(e.target).hasClass("roller-control") || $(e.target).hasClass("roller-page")) {
-			return;
-		}
-		
-		_clearTimer(data.autoTimer);
-		
-		data.startTime = new Date().getTime();
-		data.startEvent = e;
-		
 		if (!data.isAnimating) {
+			_clearTimer(data.autoTimer);
+			
+			data.$canister.css(_transition("none"));
+			
 			var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 			data.xStart = (touch) ? touch.pageX : e.clientX;
 			data.yStart = (touch) ? touch.pageY : e.clientY;
-			Site.$window.on("touchmove.roller", data, _touchMove)
-						.one("touchend.roller", data, _touchEnd)
-						.one("touchcancel.roller", data, _touchEnd);
+			
+			$window.on("touchmove.roller", data, _touchMove)
+				   .one("touchend.roller touchcancel.roller", data, _touchEnd);
 		}
 	}
 	
 	// Handle touch move
 	function _touchMove(e) {
+		e.stopPropagation();
+		
 		var data = e.data,
 			touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 		
 		data.deltaX = data.xStart - ((touch) ? touch.pageX : e.clientX);
-		data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
+		//data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
 		
-		// Only prevent event if trying to swipe
-		data.deltaXCheck = (data.deltaX < 0) ? -data.deltaX : data.deltaX;
-		data.deltaYCheck = (data.deltaY < 0) ? -data.deltaY : data.deltaY;
-		
-		if (data.deltaYCheck < 20 && data.startEvent) {
-			data.startEvent.preventDefault();
-			data.startEvent.stopPropagation();
-			data.startEvent = null;
-		}
-		if (data.deltaXCheck > 10) {
+		if (data.deltaX < -10 || data.deltaX > 10) {
 			e.preventDefault();
-			e.stopPropagation();
 		}
 		
-		var newLeft = data.leftPosition - data.deltaX;
-		if (newLeft > 0) {
-			newLeft = 0;
+		data.touchLeft = data.leftPosition - data.deltaX;
+		if (data.touchLeft > 0) {
+			data.touchLeft = 0;
 		}
-		if (newLeft < data.maxMove) {
-			newLeft = data.maxMove;
+		if (data.touchLeft < data.maxMove) {
+			data.touchLeft = data.maxMove;
 		}
 		
 		if (data.useMargin) {
-			data.$canister.css({ marginLeft: newLeft });
+			data.$canister.css({ marginLeft: data.touchLeft });
 		} else {
-			data.$canister.css({ transform: "translate3D("+newLeft+"px,0,0)" });
+			data.$canister.css(_translate3D(data.touchLeft));
 		}
 	}
+	
 	
 	// Handle touch end
 	function _touchEnd(e) {
 		var data = e.data,
-			edge = data.viewportWidth * 0.25,
+			edge = 25, //data.viewportWidth * 0.1;
 			index = data.index;
 		
-		data.endTime = new Date().getTime();
+		data.$canister.css(_transition(""));
 		
-		if (data.endTime - data.startTime > 200 && (data.deltaXCheck > 20 || data.deltaYCheck > 20)) {
-			e.preventDefault();
-			e.stopPropagation();
-		}
+		$window.off("touchmove.roller touchend.roller touchcancel.roller");
 		
-		data.startEvent = null;
-		
-		Site.$window.off("touchmove.roller")
-					.off("touchend.roller")
-					.off("touchcancle.roller");
-		
-		if (data.deltaX) {
-			if (data.deltaX > edge || data.deltaX < -edge) {
-				index = data.index + (((data.leftPosition - data.deltaX) <= data.leftPosition) ? 1 : -1);
+		if (data.paged) {
+			var goal = Infinity;
+			if (data.touchLeft == data.maxMove) {
+				index = data.$items.length - 1;
+			} else {
+				data.$items.each(function(i) {
+					var offset = $(this).position(),
+						check = offset.left + data.touchLeft;
+					
+					if (check < 0) {
+						check = -check;
+					}
+					
+					if (check < goal) {
+						goal = check;
+						index = i;
+					}
+				});
 			}
-			
-			_position(data, index, true);
-			data.deltaX = null;
+		} else {
+			index = Math.round( -data.touchLeft / data.viewportWidth);
 		}
+		
+		/*
+		if (data.deltaX > edge || data.deltaX < -edge) {
+			var index = data.index + (((data.leftPosition - data.deltaX) <= data.leftPosition) ? 1 : -1);
+		}
+		*/
+		
+		if (data.touchPaged) {
+			_position(data, index, true);
+		} else {
+			data.leftPosition = data.touchLeft;
+			data.index = index;
+			_updateControls(data);
+		}
+		data.deltaX = null;
 	}
 	
 	// Auto adavance
@@ -274,7 +294,7 @@ if (jQuery) (function($) {
 		e.preventDefault();
 		e.stopPropagation();
 		
-		var data = $(e.delegateTarget).data("roller");
+		var data = e.data;
 		_clearTimer(data.autoTimer);
 		
 		if (!data.isAnimating) {
@@ -288,8 +308,8 @@ if (jQuery) (function($) {
 		e.preventDefault();
 		e.stopPropagation();
 		
-		var data = $(e.delegateTarget).data("roller");
-		var index = data.$paginationItems.index($(e.currentTarget));
+		var data = e.data,
+			index = data.$paginationItems.index($(e.currentTarget));
 		_clearTimer(data.autoTimer);
 		
 		_position(data, index, true);
@@ -299,7 +319,6 @@ if (jQuery) (function($) {
 	function _position(data, index, animate) {
 		if (animate) {
 			data.isAnimating = true;
-			data.$roller.addClass("animated");
 		}
 		
 		if (index < 0) {
@@ -323,17 +342,27 @@ if (jQuery) (function($) {
 		if (data.useMargin) {
 			data.$canister.css({ marginLeft: data.leftPosition });
 		} else {
-			data.$canister.css({ transform: "translate3D("+data.leftPosition+"px,0,0)" });
+			data.$canister.css(_translate3D(data.leftPosition));
 		}
 		
+		data.index = index;
+		
+		_updateControls(data);
+		
+		if (animate) {
+			_startTimer(data.autoTimer, data.duration, function() {
+				data.isAnimating = false;
+			});
+		}
+	}
+	
+	// Update controls / arrows
+	function _updateControls(data) {
 		data.$captionItems.filter(".active").removeClass("active");
-		data.$captionItems.eq(index).addClass("active");
+		data.$captionItems.eq(data.index).addClass("active");
 		
 		data.$paginationItems.filter(".active").removeClass("active");
-		data.$paginationItems.eq(index).addClass("active");
-		
-		// Item callback?
-		//Site._removeVideo(data.$items.filter(".video_active"));
+		data.$paginationItems.eq(data.index).addClass("active");
 		
 		data.$items.removeClass("visible");
 		if (data.perPage != "Infinity") {
@@ -341,26 +370,11 @@ if (jQuery) (function($) {
 				if (data.leftPosition == data.maxMove) {
 					data.$items.eq(data.count - 1 - i).addClass("visible");
 				} else {
-					data.$items.eq((data.perPage * index) + i).addClass("visible");
+					data.$items.eq((data.perPage * data.index) + i).addClass("visible");
 				}
 			}
 		}
 		
-		data.index = index;
-		data.$roller.data("roller", data);
-		
-		_updateControls(data);
-		
-		if (animate) {
-			_startTimer(data.autoTimer, data.duration, function() {
-				data.isAnimating = false;
-				data.$roller.removeClass("animated");
-			});
-		}
-	}
-	
-	// Update controls / arrows
-	function _updateControls(data) {
 		if (data.pageCount <= 0) {
 			data.$controlItems.addClass("disabled");
 		} else {
@@ -388,7 +402,7 @@ if (jQuery) (function($) {
 		data.$roller.addClass("roller-initialized");
 		
 		data.count = data.$items.length;
-		data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(true) : data.$roller.outerWidth(true);
+		data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
 		
 		if (data.paged) {
 			data.maxWidth = 0;
@@ -431,6 +445,8 @@ if (jQuery) (function($) {
 		}
 		data.$paginationItems = data.$roller.find(".roller-page");
 		
+		data.$canister.css({ width: data.maxWidth });
+		
 		var index = -Math.ceil(data.leftPosition / data.viewportWidth);
 		_position(data, index, false);
 	}
@@ -445,13 +461,33 @@ if (jQuery) (function($) {
 	}
 	
 	// Handle respond
-	function _respond(e) {
+	function _respond(e, width) {
 		var data = e.data;
-		if (data.breakWidth >= Site.minWidth) {
+		if (width > data.breakWidth) {
 			pub.enable.apply(data.$roller);
 		} else {
 			pub.disable.apply(data.$roller);
 		}
+	}
+	
+	function _translate3D(value) {
+		return { 
+			"-webkit-transform": "translate3d(" + value + "px, 0, 0)",
+			   "-moz-transform": "translate3d(" + value + "px, 0, 0)",
+			    "-ms-transform": "translate3d(" + value + "px, 0, 0)",
+			     "-o-transform": "translate3d(" + value + "px, 0, 0)",
+			        "transform": "translate3d(" + value + "px, 0, 0)"
+		};
+	}
+	
+	function _transition(value) {
+		return {
+			"-webkit-transition": value,
+			   "-moz-transition": value,
+			    "-ms-transition": value,
+			     "-o-transition": value,
+			        "transition": value
+		};
 	}
 	
 	// Start Timer

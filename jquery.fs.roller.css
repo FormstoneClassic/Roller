@@ -1,40 +1,54 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.1.0
+ * @version 1.2.0
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
  
+ 	.roller * { 
+		-webkit-tap-highlight-color: rgba(0, 0, 0, 0); 
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		   -moz-user-select: none;
+		    -ms-user-select: none;
+		     -o-user-select: none;
+			    user-select: none;
+	}
+	
 	.roller,
 	.roller .roller-viewport { position: relative; }
 	.roller .roller-viewport { height: 100%; }
 	.roller .roller-canister { overflow: hidden; position: relative; width: 99999px;
-		-webkit-transition: none !important;
-		   -moz-transition: none !important;
-		    -ms-transition: none !important;
-		     -o-transition: none !important;
-		        transition: none !important;
-		-webkit-transform: translate(0px, 0px);
-		   -moz-transform: translate(0px, 0px);
-		    -ms-transform: translate(0px, 0px);
-		     -o-transform: translate(0px, 0px);
-		        transform: translate(0px, 0px);
-	}
-	.roller.animated .roller-canister { 
-		-webkit-transition: -webkit-transform 0.5s ease-out !important;
-		   -moz-transition:    -moz-transform 0.5s ease-out !important;
-		    -ms-transition:     -ms-transform 0.5s ease-out !important;
-		     -o-transition:      -o-transform 0.5s ease-out !important;
-		        transition: 		transform 0.5s ease-out !important;
+		-webkit-transition: -webkit-transform 0.4s ease;
+		   -moz-transition:    -moz-transform 0.4s ease;
+		    -ms-transition:     -ms-transform 0.4s ease;
+		     -o-transition:      -o-transform 0.4s ease;
+		        transition: 		transform 0.4s ease;
+		-webkit-transform: translate3d(0, 0, 0);
+		   -moz-transform: translate3d(0, 0, 0);
+		    -ms-transform: translate3d(0, 0, 0);
+		     -o-transform: translate3d(0, 0, 0);
+		        transform: translate3d(0, 0, 0);
 	}
 	.roller .roller-item { float: left;
+		/*
 		-webkit-transition: opacity 0.5s linear !important;
 		   -moz-transition: opacity 0.5s linear !important;
 		    -ms-transition: opacity 0.5s linear !important;
 		     -o-transition: opacity 0.5s linear !important;
 		        transition: opacity 0.5s linear !important;
+		*/
+	}
+	
+	.roller .roller-canister,
+	.roller .roller-item {
+		-webkit-backface-visibility: hidden;
+		   -moz-backface-visibility: hidden;
+		    -ms-backface-visibility: hidden;
+			 -o-backface-visibility: hidden;
+			    backface-visibility: hidden;
 	}
 	
 	.roller .roller-controls,
@@ -50,7 +64,3 @@
 	.roller .roller-captions {  }
 	.roller .roller-caption { display: none; }
 	.roller .roller-caption.active { display: block; }
-	
-	@media screen and (max-width: 740px) {
-		.roller .roller-item { -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
-	}
