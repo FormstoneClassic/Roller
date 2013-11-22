@@ -1,20 +1,19 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.2.1
+ * @version 1.2.2
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
 
 if (jQuery) (function($) {
-	var guidCount = 0,
-		$window = $(window);
+	var guid = 0;
 	
 	// Default Options
 	var options = {
-		autoTime: 8000,
 		auto: false,
+		autoTime: 8000,
 		breakWidth: 0,
 		customClass: "",
 		duration: 510,
@@ -90,10 +89,11 @@ if (jQuery) (function($) {
 		},
 		
 		// Jump pages
-		jump: function(index, animated) {
+		jump: function(index) {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				_position(data, index-1, (typeof animated != "undefined") ? animated : true);
+				_clearTimer(data.autoTimer);
+				_position(data, index-1);
 			});
 		}
 	};
@@ -129,16 +129,19 @@ if (jQuery) (function($) {
 				$pagination: $roller.find(".roller-pagination"),
 				$paginationItems: $roller.find(".roller-page"),
 				$images: $roller.find("img"),
-				isAnimating: false,
 				index: -1,
 				deltaX: null,
 				deltaY: null,
 				leftPosition: 0,
 				xStart: 0,
 				yStart: 0,
-				guid: guidCount++,
+				guid: guid++,
 				breakWidth: parseInt($roller.data("roller-break-width"), 10) || opts.breakWidth,
-				enabled: false
+				// maxWidth: 
+				// minWidth: 
+				enabled: false,
+				touchstart: 0,
+				touchEnd: 0
 			}, opts);
 			
 			data.totalImages = data.$images.length;
@@ -154,16 +157,18 @@ if (jQuery) (function($) {
 			//$(window).on("snap", data, _respond);
 			
 			if (data.auto) {
-				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { _autoAdvance(data); });
+				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { 
+					_autoAdvance(data);
+				}, true);
 			}
 			
 			if (data.totalImages > 0) {
 				data.loadedImages = 0;
 				for (var i = 0; i < data.totalImages; i++) {
 					var $img = data.$images.eq(i);
-					$img.one("load", data, _onImageLoad);
+					$img.one("load.roller", data, _onImageLoad);
 					if ($img[0].complete || $img[0].height) {
-						$img.trigger("load");
+						$img.trigger("load.roller");
 					}
 				}
 			}
@@ -177,7 +182,6 @@ if (jQuery) (function($) {
 		if (data.loadedImages == data.totalImages) {
 			data.$roller.trigger("resize.roller");
 		}
-		//data.$roller.data("roller", data);
 	}
 	
 	// Handle touch start
@@ -186,18 +190,17 @@ if (jQuery) (function($) {
 		
 		var data = e.data;
 		
-		if (!data.isAnimating) {
-			_clearTimer(data.autoTimer);
-			
-			data.$canister.css(_transition("none"));
-			
-			var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
-			data.xStart = (touch) ? touch.pageX : e.clientX;
-			data.yStart = (touch) ? touch.pageY : e.clientY;
-			
-			$window.on("touchmove.roller", data, _touchMove)
-				   .one("touchend.roller touchcancel.roller", data, _touchEnd);
-		}
+		_clearTimer(data.autoTimer);
+		
+		data.touchStart = new Date().getTime();
+		data.$canister.css(_transition("none"));
+		
+		var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
+		data.xStart = (touch) ? touch.pageX : e.clientX;
+		data.yStart = (touch) ? touch.pageY : e.clientY;
+		
+		data.$canister.on("touchmove.roller", data, _touchMove)
+					  .one("touchend.roller touchcancel.roller", data, _touchEnd);
 	}
 	
 	// Handle touch move
@@ -208,7 +211,7 @@ if (jQuery) (function($) {
 			touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 		
 		data.deltaX = data.xStart - ((touch) ? touch.pageX : e.clientX);
-		//data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
+		data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
 		
 		if (data.deltaX < -10 || data.deltaX > 10) {
 			e.preventDefault();
@@ -232,63 +235,34 @@ if (jQuery) (function($) {
 	
 	// Handle touch end
 	function _touchEnd(e) {
-		var data = e.data,
-			edge = 25, //data.viewportWidth * 0.1;
-			index = data.index;
+		var data = e.data;
 		
+		data.touchEnd = new Date().getTime();
+		data.leftPosition = data.touchLeft;
 		data.$canister.css(_transition(""));
 		
-		$window.off("touchmove.roller touchend.roller touchcancel.roller");
+		data.$canister.off("touchmove.roller touchend.roller touchcancel.roller");
 		
-		if (data.paged) {
-			var goal = Infinity;
-			if (data.touchLeft == data.maxMove) {
-				index = data.$items.length - 1;
-			} else {
-				data.$items.each(function(i) {
-					var offset = $(this).position(),
-						check = offset.left + data.touchLeft;
-					
-					if (check < 0) {
-						check = -check;
-					}
-					
-					if (check < goal) {
-						goal = check;
-						index = i;
-					}
-				});
-			}
+		var index = _calculateIndex(data);
+		
+		if (data.touchPaged && !data.swipe) {
+			_position(data, index);
 		} else {
-			index = Math.round( -data.touchLeft / data.viewportWidth);
-		}
-		
-		/*
-		if (data.deltaX > edge || data.deltaX < -edge) {
-			var index = data.index + (((data.leftPosition - data.deltaX) <= data.leftPosition) ? 1 : -1);
-		}
-		*/
-		
-		if (data.touchPaged) {
-			_position(data, index, true);
-		} else {
-			data.leftPosition = data.touchLeft;
 			data.index = index;
 			_updateControls(data);
 		}
 		data.deltaX = null;
+		data.touchStart = 0;
+		data.touchEnd = 0;
 	}
 	
-	// Auto adavance
+	// Auto adavance - NEEDS WORK
 	function _autoAdvance(data) {
 		var index = data.index + 1;
 		if (index > data.pageCount) {
 			index = 0;
 		}
-		_position(data, index, true);
-		_clearTimer(data.autoTimer);
-		
-		return true;
+		_position(data, index);
 	}
 	
 	// Adavance
@@ -299,10 +273,8 @@ if (jQuery) (function($) {
 		var data = e.data;
 		_clearTimer(data.autoTimer);
 		
-		if (!data.isAnimating) {
-			var index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
-			_position(data, index, true);
-		}
+		var index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
+		_position(data, index);
 	}
 	
 	// Select
@@ -312,17 +284,13 @@ if (jQuery) (function($) {
 		
 		var data = e.data,
 			index = data.$paginationItems.index($(e.currentTarget));
-		_clearTimer(data.autoTimer);
 		
-		_position(data, index, true);
+		_clearTimer(data.autoTimer);
+		_position(data, index);
 	}
 	
 	// Position canister
-	function _position(data, index, animate) {
-		if (animate) {
-			data.isAnimating = true;
-		}
-		
+	function _position(data, index) {
 		if (index < 0) {
 			index = 0;
 		}
@@ -350,12 +318,6 @@ if (jQuery) (function($) {
 		data.index = index;
 		
 		_updateControls(data);
-		
-		if (animate) {
-			_startTimer(data.autoTimer, data.duration, function() {
-				data.isAnimating = false;
-			});
-		}
 	}
 	
 	// Update controls / arrows
@@ -378,13 +340,13 @@ if (jQuery) (function($) {
 		}
 		
 		if (data.pageCount <= 0) {
-			data.$controlItems.addClass("disabled");
+			data.$controlItems.removeClass("enabled");
 		} else {
-			data.$controlItems.removeClass("disabled");
+			data.$controlItems.addClass("enabled");
 			if (data.index <= 0) {
-				data.$controlItems.filter(".previous").addClass("disabled");
+				data.$controlItems.filter(".previous").removeClass("enabled");
 			} else if (data.index >= data.pageCount || data.leftPosition == data.maxMove) {
-				data.$controlItems.filter(".next").addClass("disabled");
+				data.$controlItems.filter(".next").removeClass("enabled");
 			}
 		}
 	}
@@ -392,15 +354,7 @@ if (jQuery) (function($) {
 	// Handle resize
 	function _resize(e) {
 		var data = e.data;
-		data.autoTimer = _startTimer(data.autoTimer, data.debounce, function() { 
-			_doResize(data); 
-		});
 		
-		return data.$roller;
-	}
-	
-	// Do resize
-	function _doResize(data) {
 		data.$roller.addClass("roller-initialized");
 		
 		data.count = data.$items.length;
@@ -446,11 +400,13 @@ if (jQuery) (function($) {
 			data.$pagination.addClass("visible");
 		}
 		data.$paginationItems = data.$roller.find(".roller-page");
-		
 		data.$canister.css({ width: data.maxWidth });
 		
-		var index = -Math.ceil(data.leftPosition / data.viewportWidth);
-		_position(data, index, false);
+		_position(data, _calculateIndex(data));
+		
+		data.$roller.trigger("ready.roller");
+		
+		return data.$roller;
 	}
 	
 	// Handle reset
@@ -458,20 +414,57 @@ if (jQuery) (function($) {
 		var data = e.data;
 		data.$items = data.$roller.find(".roller-item");
 		
-		_doResize(data);
-		_position(data, data.index, false);
+		_resize({ data: data });
 	}
 	
 	// Handle respond
 	function _respond(e, width) {
 		var data = e.data;
-		if (width > data.breakWidth) {
-			pub.enable.apply(data.$roller);
-		} else {
-			pub.disable.apply(data.$roller);
+		if (data) {
+			if (width > data.breakWidth) {
+				pub.enable.apply(data.$roller);
+				
+				_resize({ data: data });
+			} else {
+				pub.disable.apply(data.$roller);
+			}
 		}
 	}
 	
+	// Return New Index
+	function _calculateIndex(data) {
+		if ((data.deltaX > 20 || data.deltaX < -20) && (data.touchStart && data.touchEnd) && data.touchEnd - data.touchStart < 200) {
+			// Swipe
+			return data.index + ((data.deltaX > 0) ? 1 : -1);
+		} else if (data.paged) {
+			// Find page
+			var goal = Infinity;
+			if (data.leftPosition == data.maxMove) {
+				return data.$items.length - 1;
+			} else {
+				var index = 0;
+				data.$items.each(function(i) {
+					var offset = $(this).position(),
+						check = offset.left + data.leftPosition;
+					
+					if (check < 0) {
+						check = -check;
+					}
+					
+					if (check < goal) {
+						goal = check;
+						index = i;
+					}
+				});
+				return index;
+			}
+		} else {
+			// Free scrolling
+			return Math.round( -data.leftPosition / data.viewportWidth);
+		}
+	}
+	
+	// Return translation values
 	function _translate3D(value) {
 		return { 
 			"-webkit-transform": "translate3d(" + value + "px, 0, 0)",
@@ -482,6 +475,7 @@ if (jQuery) (function($) {
 		};
 	}
 	
+	// Return transition values
 	function _transition(value) {
 		return {
 			"-webkit-transition": value,
@@ -493,15 +487,19 @@ if (jQuery) (function($) {
 	}
 	
 	// Start Timer
-	function _startTimer(timer, time, func) {
-		_clearTimer(timer);
-		return setTimeout(func, time);
+	function _startTimer(timer, time, func, interval) {
+		_clearTimer(timer, interval);
+		if (interval === true) {
+			return setInterval(func, time);
+		} else {
+			return setTimeout(func, time);
+		}
 	}
 	
 	// Clear timer
 	function _clearTimer(timer) {
 		if (timer != null) {
-			clearTimeout(timer);
+			clearInterval(timer);
 			timer = null;
 		}
 	}

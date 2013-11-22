@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.2.1
+ * @version 1.2.2
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -58,9 +58,9 @@
 	.roller .roller-controls.visible { display: block; }
 	
 	.roller .roller-controls span,
-	.roller .roller-pagination span { cursor: pointer; display: inline-block; overflow: hidden; text-indent: 110%; white-space: nowrap; }
-	.roller .roller-controls span.disabled,
-	.roller .roller-pagination span.disabled { cursor: default; }
+	.roller .roller-pagination span { cursor: default; display: inline-block; overflow: hidden; text-indent: 110%; white-space: nowrap; }
+	.roller .roller-controls span.enabled,
+	.roller .roller-pagination span.enabled { cursor: pointer; }
 	.roller .roller-captions {  }
 	.roller .roller-caption { display: none; }
 	.roller .roller-caption.active { display: block; }
