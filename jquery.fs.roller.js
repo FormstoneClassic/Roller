@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.2.2
+ * @version 1.2.3
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -14,12 +14,13 @@ if (jQuery) (function($) {
 	var options = {
 		auto: false,
 		autoTime: 8000,
-		breakWidth: 0,
 		customClass: "",
 		duration: 510,
 		debounce: 10,
 		initOnload: true,
+		minWidth: 0,
 		paged: false,
+		single: false,
 		touchPaged: true,
 		useMargin: false
 	};
@@ -93,7 +94,7 @@ if (jQuery) (function($) {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 				_clearTimer(data.autoTimer);
-				_position(data, index-1);
+				_updateItems(data, index-1);
 			});
 		}
 	};
@@ -129,14 +130,14 @@ if (jQuery) (function($) {
 				$pagination: $roller.find(".roller-pagination"),
 				$paginationItems: $roller.find(".roller-page"),
 				$images: $roller.find("img"),
-				index: -1,
+				index: 0,
 				deltaX: null,
 				deltaY: null,
 				leftPosition: 0,
 				xStart: 0,
 				yStart: 0,
 				guid: guid++,
-				breakWidth: parseInt($roller.data("roller-break-width"), 10) || opts.breakWidth,
+				minWidth: parseInt($roller.data("roller-min-width"), 10) || opts.minWidth,
 				// maxWidth: 
 				// minWidth: 
 				enabled: false,
@@ -246,7 +247,7 @@ if (jQuery) (function($) {
 		var index = _calculateIndex(data);
 		
 		if (data.touchPaged && !data.swipe) {
-			_position(data, index);
+			_updateItems(data, index);
 		} else {
 			data.index = index;
 			_updateControls(data);
@@ -256,13 +257,13 @@ if (jQuery) (function($) {
 		data.touchEnd = 0;
 	}
 	
-	// Auto adavance - NEEDS WORK
+	// Auto adavance
 	function _autoAdvance(data) {
 		var index = data.index + 1;
 		if (index > data.pageCount) {
 			index = 0;
 		}
-		_position(data, index);
+		_updateItems(data, index);
 	}
 	
 	// Adavance
@@ -274,7 +275,7 @@ if (jQuery) (function($) {
 		_clearTimer(data.autoTimer);
 		
 		var index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
-		_position(data, index);
+		_updateItems(data, index);
 	}
 	
 	// Select
@@ -286,11 +287,11 @@ if (jQuery) (function($) {
 			index = data.$paginationItems.index($(e.currentTarget));
 		
 		_clearTimer(data.autoTimer);
-		_position(data, index);
+		_updateItems(data, index);
 	}
 	
-	// Position canister
-	function _position(data, index) {
+	// Update
+	function _updateItems(data, index) {
 		if (index < 0) {
 			index = 0;
 		}
@@ -298,21 +299,29 @@ if (jQuery) (function($) {
 			index = data.pageCount;
 		}
 		
-		if (data.paged) {
-			var offset = data.$items.eq(index).position();
-			data.leftPosition = -offset.left;
+		if (data.single) {
+			data.$items.removeClass("active")
+					   .eq(index)
+					   .addClass("active");
 		} else {
-			data.leftPosition = -(index * data.pageMove);
-		}
-		
-		if (data.leftPosition < data.maxMove) { 
-			data.leftPosition = data.maxMove; 
-		}
-		
-		if (data.useMargin) {
-			data.$canister.css({ marginLeft: data.leftPosition });
-		} else {
-			data.$canister.css(_translate3D(data.leftPosition));
+			if (data.paged) {
+				var offset = data.$items.eq(index).position();
+				if (offset) {
+					data.leftPosition = -offset.left;
+				}
+			} else {
+				data.leftPosition = -(index * data.pageMove);
+			}
+			
+			if (data.leftPosition < data.maxMove) { 
+				data.leftPosition = data.maxMove; 
+			}
+			
+			if (data.useMargin) {
+				data.$canister.css({ marginLeft: data.leftPosition });
+			} else {
+				data.$canister.css(_translate3D(data.leftPosition));
+			}
 		}
 		
 		data.index = index;
@@ -402,7 +411,7 @@ if (jQuery) (function($) {
 		data.$paginationItems = data.$roller.find(".roller-page");
 		data.$canister.css({ width: data.maxWidth });
 		
-		_position(data, _calculateIndex(data));
+		_updateItems(data, _calculateIndex(data));
 		
 		data.$roller.trigger("ready.roller");
 		
@@ -421,7 +430,7 @@ if (jQuery) (function($) {
 	function _respond(e, width) {
 		var data = e.data;
 		if (data) {
-			if (width > data.breakWidth) {
+			if (width > data.minWidth) {
 				pub.enable.apply(data.$roller);
 				
 				_resize({ data: data });
@@ -433,7 +442,9 @@ if (jQuery) (function($) {
 	
 	// Return New Index
 	function _calculateIndex(data) {
-		if ((data.deltaX > 20 || data.deltaX < -20) && (data.touchStart && data.touchEnd) && data.touchEnd - data.touchStart < 200) {
+		if (data.single) {
+			return data.index;
+		} if ((data.deltaX > 20 || data.deltaX < -20) && (data.touchStart && data.touchEnd) && data.touchEnd - data.touchStart < 200) {
 			// Swipe
 			return data.index + ((data.deltaX > 0) ? 1 : -1);
 		} else if (data.paged) {
