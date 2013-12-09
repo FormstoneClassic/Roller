@@ -1,7 +1,7 @@
 /*
  * Roller Plugin [Formtone Library]
  * @author Ben Plum
- * @version 1.2.3
+ * @version 1.2.4
  *
  * Copyright © 2013 Ben Plum <mr@benplum.com>
  * Released under the MIT License <http://www.opensource.org/licenses/mit-license.php>
@@ -14,6 +14,7 @@ if (jQuery) (function($) {
 	var options = {
 		auto: false,
 		autoTime: 8000,
+		callback: $.noop,
 		customClass: "",
 		duration: 510,
 		debounce: 10,
@@ -120,16 +121,11 @@ if (jQuery) (function($) {
 		if (!$roller.data("roller")) {
 			var data = $.extend({}, {
 				$roller: $roller,
-				$viewport: $roller.find(".roller-viewport"),
-				$canister: $roller.find(".roller-canister"),
-				$items: $roller.find(".roller-item"),
-				$captions: $roller.find(".roller-captions"),
-				$captionItems: $roller.find(".roller-caption"),
-				$controls: $roller.find(".roller-controls"),
-				$controlItems: $roller.find(".roller-control"),
-				$pagination: $roller.find(".roller-pagination"),
-				$paginationItems: $roller.find(".roller-page"),
-				$images: $roller.find("img"),
+				$viewport: $roller.find(".roller-viewport").eq(0),
+				$canister: $roller.find(".roller-canister").eq(0),
+				$captions: $roller.find(".roller-captions").eq(0),
+				$controls: $roller.find(".roller-controls").eq(0),
+				$pagination: $roller.find(".roller-pagination").eq(0),
 				index: 0,
 				deltaX: null,
 				deltaY: null,
@@ -144,6 +140,12 @@ if (jQuery) (function($) {
 				touchstart: 0,
 				touchEnd: 0
 			}, opts);
+			
+			data.$items = data.$canister.children(".roller-item");
+			data.$captionItems = data.$captions.find(".roller-caption");
+			data.$controlItems = data.$controls.find(".roller-control");
+			data.$paginationItems = data.$pagination.find(".roller-page");
+			data.$images = data.$canister.find("img");
 			
 			data.totalImages = data.$images.length;
 			
@@ -325,6 +327,8 @@ if (jQuery) (function($) {
 		}
 		
 		data.index = index;
+		
+		data.callback.call(data.$roller, data.index);
 		
 		_updateControls(data);
 	}
