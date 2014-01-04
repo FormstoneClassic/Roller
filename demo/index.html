@@ -14,20 +14,24 @@
 			<link href="http://www.benplum.com/css/demo.ie.css" rel="stylesheet" type="text/css" media="all" />
 		<![endif]-->
 		
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="http://www.benplum.com/js/demo.js"></script>
 		
-		<link href="../src/jquery.fs.roller.css" rel="stylesheet" type="text/css" media="all" />
-		<script src="../src/jquery.fs.roller.js"></script>
+		<link href="../jquery.fs.roller.css" rel="stylesheet" type="text/css" media="all" />
+		<script src="../jquery.fs.roller.js"></script>
 		
 		<style>
-			.roller { height: 300px; }
-			.roller .roller-item { background: #ccc; height: 300px; margin: 0 10px 0 0; width: 300px; }
+			/* .roller { height: 300px; } */
+			.roller .roller-item { background: #ccc; color: #fff; font-size: 100px; height: 300px; line-height: 290px; margin: 0 10px 0 0; text-align: center; width: 300px; }
+			.roller .roller-viewport { overflow: hidden; }
 		</style>
 		
 		<script>
 			$(document).ready(function() {
 				$(".roller").roller();
+				
+				$(window).on("snap", function() {
+					$(".roller").roller("reset");
+				});
 			});
 		</script>
 	</head>
@@ -45,103 +49,128 @@
 				
 				<!-- BASIC -->
 				<h2>Basic</h2>
-				<p>The:</p>
+				<p>The basic Roller comes almost completely un-styled, giving you the flexibility to integrate it into your project how you see fit. At a minimum you will need to set a height and width for the <code>roller-item</code> elements so dimensions can be calculated:</p>
 				
 				<pre><code class="language-javascript">$(".roller").roller();</code></pre>
+				<pre><code class="language-css">.roller-item { height: 300px; width: 300px; }</code></pre>
 				<pre><code class="language-markup">&lt;div class="roller"&gt;
-	&lt;div class="roller-canister"&gt;
-		&lt;div class="roller-item"&gt;
-			// Content
-		&lt;/div&gt;
-		&lt;div class="roller-item"&gt;
-			// Content
-		&lt;/div&gt;
-		&lt;div class="roller-item"&gt;
-			// Content
-		&lt;/div&gt;
+	&lt;div class="roller-item"&gt;
+		// Content
+	&lt;/div&gt;
+	&lt;div class="roller-item"&gt;
+		// Content
+	&lt;/div&gt;
+	&lt;div class="roller-item"&gt;
+		// Content
 	&lt;/div&gt;
 &lt;/div&gt;</code></pre>
 				
 				<h5>Demo</h5>
 				<div class="roller">
-					<div class="roller-canister">
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
+					<div class="roller-item">
+						1
 					</div>
-					<div class="roller-controls">
-						<span class="roller-control previous">Previous</span>
-						<span class="roller-control next">Next</span>
+					<div class="roller-item">
+						2
 					</div>
-					<div class="roller-pagination">
+					<div class="roller-item">
+						3
 					</div>
-				</form>
+					<div class="roller-item">
+						4
+					</div>
+					<div class="roller-item">
+						5
+					</div>
+				</div>
+				
+				<br />
+				
+				<!-- PAGED -->
+				<h2>Paged</h2>
+				<p>Bt default, Roller will calculate page sizes by determining how many <code>roller-item</code> elements will fit in the <code>roller-viewport</code> at once. You can opt to have Roller stop at every <code>roller-item</code> element by setting the <code>paged</code> option at initialization:</p>
+				
+				<pre><code class="language-javascript">$(".roller").roller({
+	paged: true
+});</code></pre>
 				
 				<h5>Demo</h5>
 				<div class="roller" data-roller-options='{"paged":"true"}'>
-					<div class="roller-canister">
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
+					<div class="roller-item">
+						1
 					</div>
-					<div class="roller-controls">
-						<span class="roller-control previous">Previous</span>
-						<span class="roller-control next">Next</span>
+					<div class="roller-item">
+						2
 					</div>
-					<div class="roller-pagination">
+					<div class="roller-item">
+						3
 					</div>
-				</form>
+					<div class="roller-item">
+						4
+					</div>
+					<div class="roller-item">
+						5
+					</div>
+				</div>
+				
+				<br />
+				
+				<!-- SINGLE -->
+				<h2>Single</h2>
+				<p>The:</p>
+				
+				<pre><code class="language-javascript">$(".roller").roller({
+	single: true
+});</code></pre>
 				
 				<h5>Demo</h5>
 				<div class="roller" data-roller-options='{"single":"true"}'>
-					<div class="roller-canister">
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
-						<div class="roller-item">
-							
-						</div>
+					<div class="roller-item">
+						1
 					</div>
-					<div class="roller-controls">
-						<span class="roller-control previous">Previous</span>
-						<span class="roller-control next">Next</span>
+					<div class="roller-item">
+						2
 					</div>
-					<div class="roller-pagination">
+					<div class="roller-item">
+						3
 					</div>
-				</form>
+					<div class="roller-item">
+						4
+					</div>
+					<div class="roller-item">
+						5
+					</div>
+				</div>
+				
+				<br />
+				
+				<!-- Advanced -->
+				<h2>Advanced</h2>
+				<p>The:</p>
+				
+				<pre><code class="language-javascript">$(".roller").roller({
+	pagination: false,
+	controls: false
+});</code></pre>
+				
+				<h5>Demo</h5>
+				<div class="roller" data-roller-options='{"controls":false,"pagination":false}'>
+					<div class="roller-item">
+						1
+					</div>
+					<div class="roller-item">
+						2
+					</div>
+					<div class="roller-item">
+						3
+					</div>
+					<div class="roller-item">
+						4
+					</div>
+					<div class="roller-item">
+						5
+					</div>
+				</div>
 				
 			</div>
 		</article>

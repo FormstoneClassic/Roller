@@ -1,109 +1,270 @@
 /* 
- * Roller v1.2.5 - 2013-12-23 
+ * Roller v1.2.7 - 2014-01-04 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://www.benplum.com/formstone/roller/ 
  * 
- * Copyright 2013 Ben Plum; MIT Licensed 
+ * Copyright 2014 Ben Plum; MIT Licensed 
+ */ 
+
+/** 
+ * @plugin 
+ * @name Roller 
+ * @description A jQuery plugin for simple content carousels. Part of the Formstone Library. 
+ * @version 1.2.7 
  */ 
 
 ;(function ($, window) {
 	"use strict";
 	
-	var guid = 0;
-	
-	// Default Options
+	/**
+	 * @options
+	 * @param auto [boolean] <false> "Flag to auto advance items"
+	 * @param autoTime [int] <8000> "Auto advance time"
+	 * @param controls [boolean] <true> "Flag to draw controls"
+	 * @param customClass [string] <''> "Class applied to instance"
+	 * @param duration [int] <500> "Animation duration; should match CSS animation time"
+	 * @param maxWidth [string] <'Infinity'> "Width at which to auto-disable plugin"
+	 * @param minWidth [string] <'0'> "Width at which to auto-disable plugin"
+	 * @param paged [boolean] <false> "Flag for paged items"
+	 * @param pagination [boolean] <true> "Flag to draw pagination"
+	 * @param single [boolean] <false> "Flag for single items"
+	 * @param touchPaged [boolean] <true> "Flag for paged touch interaction"
+	 * @param useMargin [boolean] <false> "Use margins instead of css transitions (legacy browser support)"
+	 */
 	var options = {
 		auto: false,
 		autoTime: 8000,
-		callback: $.noop,
+		controls: true,
 		customClass: "",
-		duration: 510,
-		debounce: 10,
-		initOnload: true,
-		minWidth: 0,
+		duration: 500,
+		maxWidth: 'Infinity',
+		minWidth: '0',
 		paged: false,
+		pagination: true,
 		single: false,
 		touchPaged: true,
 		useMargin: false
 	};
 	
-	// Public Methods
+	/**
+	 * @events
+	 * @event update.roller "Canister position updated"
+	 */
+	
 	var pub = {
 		
-		// Set Defaults
+		/**
+		 * @method 
+		 * @name defaults
+		 * @description Sets default plugin options
+		 * @param opts [object] <{}> "Options object"
+		 * @example $(".target").roller("defaults", opts);
+		 */
 		defaults: function(opts) {
 			options = $.extend(options, opts || {});
 			return $(this);
 		},
 		
-		// Destroy Roller
+		/**
+		 * @method 
+		 * @name destroy
+		 * @description Removes instance of plugin
+		 * @example $(".target").roller("destroy");
+		 */
 		destroy: function() {
 			return $(this);
 		},
 		
-		// Disable instance
+		/**
+		 * @method 
+		 * @name disable
+		 * @description Disables instance of plugin
+		 * @example $(".target").roller("disable");
+		 */
 		disable: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 				
-				if (data.enabled) {
-					_clearTimer(data.autoTimer);
-					
-					data.$roller.removeClass("roller roller-initialized")
-								.off("touchstart.roller click.roller resize.roller reset.roller");
-					
-					data.$canister.css({ width: "" })
-								  .off("touchstart.roller");
-					
-					data.$pagination.html("");
-					
-					if (data.useMargin) {
-						data.$canister.css({ marginLeft: "" });
-					} else {
-						data.$canister.css(_translate3D(0));
+				if (typeof data !== "undefined") {
+					if (data.enabled) {
+						_clearTimer(data.autoTimer);
+						
+						data.$roller.removeClass("roller roller-initialized")
+									.off("touchstart.roller click.roller");
+						
+						data.$canister.css({ width: "" })
+									  .off("touchstart.roller");
+						
+						data.$pagination.html("");
+						
+						if (data.useMargin) {
+							data.$canister.css({ marginLeft: "" });
+						} else {
+							data.$canister.css( _prefix("transform", "translate3d(0px, 0, 0)") );
+						}
+						
+						data.index = 0;
 					}
 					
-					data.index = 0;
+					data.enabled = false;
 				}
-				
-				data.enabled = false;
 			});
 		},
 		
-		// Enable instance
+		/**
+		 * @method 
+		 * @name enable
+		 * @description Enables instance of plugin
+		 * @example $(".target").roller("enable");
+		 */
 		enable: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 				
-				if (!data.enabled) {
-					data.$roller.data("roller", data)
-								.addClass("roller")
-								.on("touchstart.roller click.roller", ".roller-control", data, _advance)
-								.on("touchstart.roller click.roller", ".roller-page", data, _select)
-								.on("resize.roller", data, _resize)
-								.on("reset.roller", data, _reset)
-								.trigger("resize.roller");
+				if (typeof data !== "undefined") {
+					if (!data.enabled) {
+						data.$roller.data("roller", data)
+									.addClass("roller")
+									.on("touchstart.roller click.roller", ".roller-control", data, _onAdvance)
+									.on("touchstart.roller click.roller", ".roller-page", data, _onSelect);
+						
+						pub.resize.apply(data.$roller);
+						
+						data.$canister.on("touchstart.roller", data, _onTouchStart);
+					}
 					
-					data.$canister.on("touchstart.roller", data, _touchStart);
+					data.enabled = true;
 				}
-				
-				data.enabled = true;
 			});
 		},
 		
-		// Jump pages
+		/**
+		 * @method 
+		 * @name jump
+		 * @description Jump instance of plugin to specific page
+		 * @example $(".target").roller("jump", 1);
+		 */
 		jump: function(index) {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				_clearTimer(data.autoTimer);
-				_updateItems(data, index-1);
+				
+				if (typeof data !== "undefined") {
+					_clearTimer(data.autoTimer);
+					_position(data, index-1);
+				}
+			});
+		},
+		
+		/**
+		 * @method 
+		 * @name resize
+		 * @description Resizes each instance
+		 * @example $(".target").roller("resize");
+		 */
+		resize: function() {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+				
+				if (typeof data !== "undefined") {
+					data.count = data.$items.length;
+					data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
+					
+					if (data.single) {
+						data.perPage = 1;
+						data.pageCount = data.count - 1;
+					} else if (data.paged) {
+						data.maxWidth = 0;
+						for (var i = 0; i < data.count; i++) {
+							data.maxWidth += data.$items.eq(i).outerWidth(true);
+						}
+						data.perPage = 1;
+						data.pageCount = (data.maxWidth > data.viewportWidth) ? data.count - 1 : 0;
+					} else {
+						data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
+						data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
+						data.perPage = Math.floor(data.viewportWidth / data.itemWidth);
+						if (data.perPage < 1) {
+							data.perPage = 1;
+						}
+						data.pageCount = Math.ceil(data.count / data.perPage) - 1;
+						data.pageMove = data.itemWidth * data.perPage;
+						data.maxWidth = data.itemWidth * data.count;
+					}
+					
+					data.maxMove = -data.maxWidth + data.viewportWidth + data.itemMargin;
+					if (data.maxMove > 0) {
+						data.maxMove = 0;
+					}
+					
+					// Reset Page Count
+					if (data.pageCount !== "Infinity") {
+						var html = '';
+						for (var j = 0; j <= data.pageCount; j++) {
+							html += '<span class="roller-page">' + (j + 1) + '</span>';
+						}
+						data.$pagination.html(html);
+					}
+					if (data.pageCount < 1) {
+						data.$controls.removeClass("visible");
+						data.$pagination.removeClass("visible");
+					} else {
+						data.$controls.addClass("visible");
+						data.$pagination.addClass("visible");
+					}
+					data.$paginationItems = data.$roller.find(".roller-page");
+					data.$canister.css({ width: data.maxWidth });
+					
+					_position(data, _calculateIndex(data));
+				}
+			});
+		},
+		
+		/**
+		 * @method 
+		 * @name reset
+		 * @description Resets instance after item change
+		 * @example $(".target").roller("reset");
+		 */
+		reset: function() {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+				
+				if (typeof data !== "undefined") {
+					data.$items = data.$roller.find(".roller-item");
+					pub.resize.apply(data.$roller);
+				}
+			});
+		},
+		
+		/**
+		 * @method 
+		 * @name respond
+		 * @description Responds to media query events
+		 * @example $(".target").roller("respond");
+		 */
+		respond: function() {
+			return $(this).each(function() {
+				var data = $(this).data("roller"),
+					width = 0;
+				
+				if (typeof data !== "undefined") {
+					if (width > data.minWidth) {
+						pub.enable.apply(data.$roller);
+						pub.resize.apply(data.$roller);
+					} else {
+						pub.disable.apply(data.$roller);
+					}
+				}
 			});
 		}
 	};
 	
-	// Private Methods
-	
-	// Initialize
+	/**
+	 * @method private
+	 * @name _init
+	 * @description Initializes plugin
+	 * @param opts [object] "Initialization options"
+	 */
 	function _init(opts) {
 		// Settings
 		opts = $.extend({}, options, opts);
@@ -117,10 +278,31 @@
 		return $items;
 	}
 	
-	// Build
+	/**
+	 * @method private
+	 * @name _build
+	 * @description Builds each instance
+	 * @param $roller [jQuery object] "Target jQuery object"
+	 * @param opts [object] <{}> "Options object"
+	 */
 	function _build($roller, opts) {
 		if (!$roller.data("roller")) {
 			opts = $.extend({}, opts, $roller.data("roller-options"));
+			
+			var html = '';
+			if (opts.controls) {
+				html += '<div class="roller-controls">';
+				html += '<span class="roller-control previous">Previous</span>';
+				html += '<span class="roller-control next">Next</span>';
+				html += '</div>';
+			}
+			if (opts.pagination) {
+				html += '<div class="roller-pagination">';
+				html += '</div>';
+			}
+			
+			$roller.wrapInner('<div class="roller-viewport"><div class="roller-canister"></div></div>')
+				   .append(html);
 			
 			var data = $.extend({}, {
 				$roller: $roller,
@@ -135,10 +317,6 @@
 				leftPosition: 0,
 				xStart: 0,
 				yStart: 0,
-				guid: guid++,
-				minWidth: parseInt($roller.data("roller-min-width"), 10) || opts.minWidth,
-				// maxWidth: 
-				// minWidth: 
 				enabled: false,
 				touchstart: 0,
 				touchEnd: 0
@@ -157,14 +335,9 @@
 			}
 			
 			$roller.data("roller", data)
-				   .on("respond.roller", data, _respond);
+				   .addClass("initialized");
 			
-			if (data.initOnload) {
-				pub.enable.apply(data.$roller);
-			}
-			
-			// Rubberband support??
-			//$(window).on("snap", data, _respond);
+			pub.enable.apply(data.$roller);
 			
 			if (data.auto) {
 				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { 
@@ -185,17 +358,27 @@
 		}
 	}
 	
-	// Handle image load
+	/**
+	 * @method private
+	 * @name _onImageLoad
+	 * @description Handles child image load
+	 * @param e [object] "Event data"
+	 */
 	function _onImageLoad(e) {
 		var data = e.data;
 		data.loadedImages++;
 		if (data.loadedImages === data.totalImages) {
-			data.$roller.trigger("resize.roller");
+			pub.resize.apply(data.$roller);
 		}
 	}
 	
-	// Handle touch start
-	function _touchStart(e) {
+	/**
+	 * @method private
+	 * @name _onTouchStart
+	 * @description Handles touchstart event
+	 * @param e [object] "Event data"
+	 */
+	function _onTouchStart(e) {
 		e.stopPropagation();
 		
 		var data = e.data;
@@ -203,18 +386,23 @@
 		_clearTimer(data.autoTimer);
 		
 		data.touchStart = new Date().getTime();
-		data.$canister.css(_transition("none"));
+		data.$canister.css( _prefix("transition", "none") );
 		
 		var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 		data.xStart = (touch) ? touch.pageX : e.clientX;
 		data.yStart = (touch) ? touch.pageY : e.clientY;
 		
-		data.$canister.on("touchmove.roller", data, _touchMove)
-					  .one("touchend.roller touchcancel.roller", data, _touchEnd);
+		data.$canister.on("touchmove.roller", data, _onTouchMove)
+					  .one("touchend.roller touchcancel.roller", data, _onTouchEnd);
 	}
 	
-	// Handle touch move
-	function _touchMove(e) {
+	/**
+	 * @method private
+	 * @name _onTouchMove
+	 * @description Handles touchmove event
+	 * @param e [object] "Event data"
+	 */
+	function _onTouchMove(e) {
 		e.stopPropagation();
 		
 		var data = e.data,
@@ -238,25 +426,29 @@
 		if (data.useMargin) {
 			data.$canister.css({ marginLeft: data.touchLeft });
 		} else {
-			data.$canister.css(_translate3D(data.touchLeft));
+			data.$canister.css( _prefix("transform", "translate3d("+data.touchLeft+"px, 0, 0)") );
 		}
 	}
 	
-	
-	// Handle touch end
-	function _touchEnd(e) {
+	/**
+	 * @method private
+	 * @name _onTouchEnd
+	 * @description Handles touchend event
+	 * @param e [object] "Event data"
+	 */
+	function _onTouchEnd(e) {
 		var data = e.data;
 		
 		data.touchEnd = new Date().getTime();
 		data.leftPosition = data.touchLeft;
-		data.$canister.css(_transition(""));
+		data.$canister.css( _prefix("transition", "") );
 		
 		data.$canister.off("touchmove.roller touchend.roller touchcancel.roller");
 		
 		var index = _calculateIndex(data);
 		
 		if (data.touchPaged && !data.swipe) {
-			_updateItems(data, index);
+			_position(data, index);
 		} else {
 			data.index = index;
 			_updateControls(data);
@@ -266,29 +458,44 @@
 		data.touchEnd = 0;
 	}
 	
-	// Auto adavance
+	/**
+	 * @method private
+	 * @name _autoAdvance
+	 * @description Handles auto advancement
+	 * @param data [object] "Instance data"
+	 */
 	function _autoAdvance(data) {
 		var index = data.index + 1;
 		if (index > data.pageCount) {
 			index = 0;
 		}
-		_updateItems(data, index);
+		_position(data, index);
 	}
 	
-	// Adavance
-	function _advance(e) {
+	/**
+	 * @method private
+	 * @name _onAdvance
+	 * @description Handles item advancement
+	 * @param e [object] "Event data"
+	 */
+	function _onAdvance(e) {
 		e.preventDefault();
 		e.stopPropagation();
 		
-		var data = e.data;
-		_clearTimer(data.autoTimer);
+		var data = e.data,
+			index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
 		
-		var index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
-		_updateItems(data, index);
+		_clearTimer(data.autoTimer);
+		_position(data, index);
 	}
 	
-	// Select
-	function _select(e) {
+	/**
+	 * @method private
+	 * @name _onSelect
+	 * @description Handles item select
+	 * @param e [object] "Event data"
+	 */
+	function _onSelect(e) {
 		e.preventDefault();
 		e.stopPropagation();
 		
@@ -296,11 +503,17 @@
 			index = data.$paginationItems.index($(e.currentTarget));
 		
 		_clearTimer(data.autoTimer);
-		_updateItems(data, index);
+		_position(data, index);
 	}
 	
-	// Update
-	function _updateItems(data, index) {
+	/**
+	 * @method private
+	 * @name _position
+	 * @description Handles updating instance position
+	 * @param data [object] "Instance data"
+	 * @param index [int] "Item index"
+	 */
+	function _position(data, index) {
 		if (index < 0) {
 			index = 0;
 		}
@@ -329,18 +542,23 @@
 			if (data.useMargin) {
 				data.$canister.css({ marginLeft: data.leftPosition });
 			} else {
-				data.$canister.css(_translate3D(data.leftPosition));
+				data.$canister.css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
 			}
 		}
 		
 		data.index = index;
 		
-		data.callback.call(data.$roller, data.index);
-		
 		_updateControls(data);
+		
+		data.$roller.trigger("update.roller");
 	}
 	
-	// Update controls / arrows
+	/**
+	 * @method private
+	 * @name _updateControls
+	 * @description Handles updating instance controls
+	 * @param data [object] "Instance data"
+	 */
 	function _updateControls(data) {
 		data.$captionItems.filter(".active").removeClass("active");
 		data.$captionItems.eq(data.index).addClass("active");
@@ -371,90 +589,13 @@
 		}
 	}
 	
-	// Handle resize
-	function _resize(e) {
-		var data = e.data;
-		
-		data.$roller.addClass("roller-initialized");
-		
-		data.count = data.$items.length;
-		data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
-		
-		if (data.single) {
-			data.perPage = 1;
-			data.pageCount = data.count - 1;
-		} else if (data.paged) {
-			data.maxWidth = 0;
-			for (var i = 0; i < data.count; i++) {
-				data.maxWidth += data.$items.eq(i).outerWidth(true);
-			}
-			data.perPage = 1;
-			data.pageCount = (data.maxWidth > data.viewportWidth) ? data.count - 1 : 0;
-		} else {
-			data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
-			data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
-			data.perPage = Math.floor(data.viewportWidth / data.itemWidth);
-			if (data.perPage < 1) {
-				data.perPage = 1;
-			}
-			data.pageCount = Math.ceil(data.count / data.perPage) - 1;
-			data.pageMove = data.itemWidth * data.perPage;
-			data.maxWidth = data.itemWidth * data.count;
-		}
-		
-		data.maxMove = -data.maxWidth + data.viewportWidth + data.itemMargin;
-		if (data.maxMove > 0) {
-			data.maxMove = 0;
-		}
-		
-		// Reset Page Count
-		if (data.pageCount !== "Infinity") {
-			var html = '';
-			for (var j = 0; j <= data.pageCount; j++) {
-				html += '<span class="roller-page">' + (j + 1) + '</span>';
-			}
-			data.$pagination.html(html);
-		}
-		if (data.pageCount < 1) {
-			data.$controls.removeClass("visible");
-			data.$pagination.removeClass("visible");
-		} else {
-			data.$controls.addClass("visible");
-			data.$pagination.addClass("visible");
-		}
-		data.$paginationItems = data.$roller.find(".roller-page");
-		data.$canister.css({ width: data.maxWidth });
-		
-		_updateItems(data, _calculateIndex(data));
-		
-		data.$roller.trigger("ready.roller");
-		
-		return data.$roller;
-	}
-	
-	// Handle reset
-	function _reset(e) {
-		var data = e.data;
-		data.$items = data.$roller.find(".roller-item");
-		
-		_resize({ data: data });
-	}
-	
-	// Handle respond
-	function _respond(e, width) {
-		var data = e.data;
-		if (data) {
-			if (width > data.minWidth) {
-				pub.enable.apply(data.$roller);
-				
-				_resize({ data: data });
-			} else {
-				pub.disable.apply(data.$roller);
-			}
-		}
-	}
-	
-	// Return New Index
+	/**
+	 * @method private
+	 * @name _calculateIndex
+	 * @description Determines new index based on current position
+	 * @param data [object] "Instance data"
+	 * @return [int] "New item index"
+	 */
 	function _calculateIndex(data) {
 		if (data.single) {
 			return data.index;
@@ -489,29 +630,35 @@
 		}
 	}
 	
-	// Return translation values
-	function _translate3D(value) {
-		return { 
-			"-webkit-transform": "translate3d(" + value + "px, 0, 0)",
-			   "-moz-transform": "translate3d(" + value + "px, 0, 0)",
-			    "-ms-transform": "translate3d(" + value + "px, 0, 0)",
-			     "-o-transform": "translate3d(" + value + "px, 0, 0)",
-			        "transform": "translate3d(" + value + "px, 0, 0)"
-		};
+	/**
+	 * @method private
+	 * @name _prefix
+	 * @description Builds vendor-prefixed styles
+	 * @param property [string] "Property to prefix"
+	 * @param value [string] "Property value"
+	 * @return [string] "Vendor-prefixed styles"
+	 */
+	function _prefix(property, value) {
+		var r = {};
+		
+		r["-webkit-" + property] = value;
+		r[   "-moz-" + property] = value;
+		r[    "-ms-" + property] = value;
+		r[     "-o-" + property] = value;
+		r[             property] = value;
+		
+		return r;
 	}
 	
-	// Return transition values
-	function _transition(value) {
-		return {
-			"-webkit-transition": value,
-			   "-moz-transition": value,
-			    "-ms-transition": value,
-			     "-o-transition": value,
-			        "transition": value
-		};
-	}
-	
-	// Start Timer
+	/**
+	 * @method private
+	 * @name _startTimer
+	 * @description Starts an internal timer
+	 * @param timer [int] "Timer ID"
+	 * @param time [int] "Time until execution"
+	 * @param callback [int] "Function to execute"
+	 * @param interval [boolean] "Flag for recurring interval"
+	 */
 	function _startTimer(timer, time, func, interval) {
 		_clearTimer(timer, interval);
 		if (interval === true) {
@@ -521,7 +668,12 @@
 		}
 	}
 	
-	// Clear timer
+	/**
+	 * @method private
+	 * @name _clearTimer
+	 * @description Clears an internal timer
+	 * @param timer [int] "Timer ID"
+	 */
 	function _clearTimer(timer) {
 		if (timer !== null) {
 			clearInterval(timer);
@@ -529,7 +681,6 @@
 		}
 	}
 	
-	// Define Plugin
 	$.fn.roller = function(method) {
 		if (pub[method]) {
 			return pub[method].apply(this, Array.prototype.slice.call(arguments, 1));

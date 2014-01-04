@@ -1,9 +1,9 @@
 /* 
- * Roller v1.2.5 - 2013-12-23 
+ * Roller v1.2.7 - 2014-01-04 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://www.benplum.com/formstone/roller/ 
  * 
- * Copyright 2013 Ben Plum; MIT Licensed 
+ * Copyright 2014 Ben Plum; MIT Licensed 
  */ 
 
  	.roller * { 
@@ -20,7 +20,7 @@
 	.roller .roller-viewport { position: relative; }
 	.roller { width: 100%; }
 	.roller .roller-viewport { height: 100%; width: 100%; }
-	.roller .roller-canister { overflow: hidden; position: relative; width: 99999px;
+	.roller .roller-canister { overflow: hidden; position: relative;
 		-webkit-transition: -webkit-transform 0.4s ease;
 		   -moz-transition:    -moz-transform 0.4s ease;
 		    -ms-transition:     -ms-transform 0.4s ease;
@@ -61,5 +61,3 @@
 	/* !Single */
 	.roller-single .roller-item { display: none; }
 	.roller-single .roller-item.active { display: block; }
-	
-	/* display: inline-block; overflow: hidden; text-indent: 110%; white-space: nowrap; */
