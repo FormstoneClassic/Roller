@@ -1,7 +1,7 @@
 /* 
- * Roller v1.2.7 - 2014-01-04 
+ * Roller v3.0.0 - 2014-01-04 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
- * http://www.benplum.com/formstone/roller/ 
+ * http://formstone.it/roller/ 
  * 
  * Copyright 2014 Ben Plum; MIT Licensed 
  */ 
@@ -10,7 +10,7 @@
  * @plugin 
  * @name Roller 
  * @description A jQuery plugin for simple content carousels. Part of the Formstone Library. 
- * @version 1.2.7 
+ * @version 3.0.0 
  */ 
 
 ;(function ($, window) {

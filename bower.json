@@ -1,6 +1,6 @@
 {
   "name": "Roller",
-  "version": "1.2.7",
+  "version": "3.0.0",
   "description": "A jQuery plugin for simple content carousels. Part of the Formstone Library.",
   "author": {
     "name": "Ben Plum",
@@ -8,5 +8,5 @@
     "url": "http://www.benplum.com"
   },
   "license": "MIT",
-  "homepage": "http://www.benplum.com/formstone/roller/"
+  "homepage": "http://formstone.it/roller/"
 }

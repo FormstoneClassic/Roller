@@ -3,8 +3,8 @@
 
 A jQuery plugin for simple content carousels. Part of the Formstone Library. 
 
-- [Demo](http://www.benplum.com/components/Roller/demo/index.html) 
-- [Documentation](http://www.benplum.com/formstone/roller/) 
+- [Demo](http://formstone.it/components/Roller/demo/index.html) 
+- [Documentation](http://formstone.it/roller/) 
 
 #### Bower Support 
 `bower install Roller`
