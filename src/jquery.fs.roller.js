@@ -115,7 +115,9 @@
 						
 						pub.resize.apply(data.$roller);
 						
-						data.$canister.on("touchstart.roller", data, _onTouchStart);
+						if (!data.single) {
+							data.$canister.on("touchstart.roller", data, _onTouchStart);
+						}
 					}
 					
 					data.enabled = true;
@@ -197,7 +199,10 @@
 						data.$pagination.addClass("visible");
 					}
 					data.$paginationItems = data.$roller.find(".roller-page");
-					data.$canister.css({ width: data.maxWidth });
+					
+					if (!data.single) {
+						data.$canister.css({ width: data.maxWidth });
+					}
 					
 					_position(data, _calculateIndex(data));
 				}

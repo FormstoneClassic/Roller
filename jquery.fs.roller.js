@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.0 - 2014-01-06 
+ * Roller v3.0.1 - 2014-01-07 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -10,7 +10,7 @@
  * @plugin 
  * @name Roller 
  * @description A jQuery plugin for simple content carousels. Part of the Formstone Library. 
- * @version 3.0.0 
+ * @version 3.0.1 
  */ 
 
 ;(function ($, window) {
@@ -130,7 +130,9 @@
 						
 						pub.resize.apply(data.$roller);
 						
-						data.$canister.on("touchstart.roller", data, _onTouchStart);
+						if (!data.single) {
+							data.$canister.on("touchstart.roller", data, _onTouchStart);
+						}
 					}
 					
 					data.enabled = true;
@@ -212,7 +214,10 @@
 						data.$pagination.addClass("visible");
 					}
 					data.$paginationItems = data.$roller.find(".roller-page");
-					data.$canister.css({ width: data.maxWidth });
+					
+					if (!data.single) {
+						data.$canister.css({ width: data.maxWidth });
+					}
 					
 					_position(data, _calculateIndex(data));
 				}
