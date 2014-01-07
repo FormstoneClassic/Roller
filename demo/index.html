@@ -8,13 +8,13 @@
 		
 		<link href="http://fonts.googleapis.com/css?family=Lato:300,400,900" rel="stylesheet" type="text/css" media="all" />
 		<link href="http://fonts.googleapis.com/css?family=PT+Mono" rel="stylesheet" type="text/css">
-		<link href="http://www.benplum.com/css/demo.css" rel="stylesheet" type="text/css" media="all" />
+		<link href="http://formstone.it/css/demo.css" rel="stylesheet" type="text/css" media="all" />
 		
 		<!--[if LTE IE 8]>
-			<link href="http://www.benplum.com/css/demo.ie.css" rel="stylesheet" type="text/css" media="all" />
+			<link href="http://formstone.it/css/demo.ie.css" rel="stylesheet" type="text/css" media="all" />
 		<![endif]-->
 		
-		<script src="http://www.benplum.com/js/demo.js"></script>
+		<script src="http://formstone.it/js/demo.js"></script>
 		
 		<link href="../jquery.fs.roller.css" rel="stylesheet" type="text/css" media="all" />
 		<script src="../jquery.fs.roller.js"></script>
@@ -36,24 +36,29 @@
 		</script>
 	</head>
 	<body class="gridlock demo">
-		<header class="header">
+		<header id="header">
 			<div class="row">
-				<div class="mobile-full tablet-full desktop-8 desktop-push-2">
-					<h1>Roller Demo</h1>
-					<p>A jQuery plugin for simple content carousels. <a href="http://www.benplum.com/formstone/roller/" class="no-pronto">Learn More.</a></p>
+				<div class="all-full">
+					<a href="http://formstone.it/" class="branding">Formstone</a>
 				</div>
 			</div>
 		</header>
 		<article class="row page">
 			<div class="mobile-full tablet-full desktop-8 desktop-push-2">
+				<header class="header">
+					<h1>Roller Demo</h1>
+					<!-- <p>A technical demonstration of the jQuery plugin.</p> -->
+					<br />
+					<a href="http://formstone.it/rubberband/" class="button">View Documentation</a>
+				</header>
 				
 				<!-- BASIC -->
 				<h2>Basic</h2>
 				<p>The basic Roller comes almost completely un-styled, giving you the flexibility to integrate it into your project how you see fit. At a minimum you will need to set a height and width for the <code>roller-item</code> elements so dimensions can be calculated:</p>
 				
-				<pre><code class="language-javascript">$(".roller").roller();</code></pre>
-				<pre><code class="language-css">.roller-item { height: 300px; width: 300px; }</code></pre>
-				<pre><code class="language-markup">&lt;div class="roller"&gt;
+				<pre class="example"><code class="language-javascript">$(".roller").roller();</code></pre>
+				<pre class="example"><code class="language-css">.roller-item { height: 300px; width: 300px; }</code></pre>
+				<pre class="example"><code class="language-markup">&lt;div class="roller"&gt;
 	&lt;div class="roller-item"&gt;
 		// Content
 	&lt;/div&gt;
@@ -90,7 +95,7 @@
 				<h2>Paged</h2>
 				<p>Bt default, Roller will calculate page sizes by determining how many <code>roller-item</code> elements will fit in the <code>roller-viewport</code> at once. You can opt to have Roller stop at every <code>roller-item</code> element by setting the <code>paged</code> option at initialization:</p>
 				
-				<pre><code class="language-javascript">$(".roller").roller({
+				<pre class="example"><code class="language-javascript">$(".roller").roller({
 	paged: true
 });</code></pre>
 				
@@ -119,7 +124,7 @@
 				<h2>Single</h2>
 				<p>The:</p>
 				
-				<pre><code class="language-javascript">$(".roller").roller({
+				<pre class="example"><code class="language-javascript">$(".roller").roller({
 	single: true
 });</code></pre>
 				
@@ -148,7 +153,7 @@
 				<h2>Advanced</h2>
 				<p>The:</p>
 				
-				<pre><code class="language-javascript">$(".roller").roller({
+				<pre class="example"><code class="language-javascript">$(".roller").roller({
 	pagination: false,
 	controls: false
 });</code></pre>
