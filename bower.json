@@ -1,6 +1,6 @@
 {
   "name": "Roller",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "A jQuery plugin for simple content carousels. Part of the Formstone Library.",
   "author": {
     "name": "Ben Plum",
@@ -8,5 +8,13 @@
     "url": "http://www.benplum.com"
   },
   "license": "MIT",
-  "homepage": "http://formstone.it/roller/"
+  "homepage": "http://formstone.it/roller/",
+  "main": [
+    "jquery.fs.roller.js",
+    "jquery.fs.roller.css"
+  ],
+  "ignore": [
+    "*.json",
+    "Gruntfile.js"
+  ]
 }

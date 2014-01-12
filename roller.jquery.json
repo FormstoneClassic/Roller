@@ -1,6 +1,6 @@
 {
   "name": "roller",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "title": "Roller",
   "author": {
     "name": "Ben Plum",
@@ -16,7 +16,6 @@
   "dependencies": {
     "jquery": ">=1.7"
   },
-  "homepage": "http://formstone.it/roller/",
   "description": "A jQuery plugin for simple content carousels. Part of the Formstone Library.",
   "keywords": [
     "carousel",
@@ -31,5 +30,6 @@
   "docs": "http://formstone.it/roller/",
   "demo": "http://formstone.it/roller/",
   "download": "https://github.com/benplum/Roller",
-  "bugs": "https://github.com/benplum/Roller/issues"
+  "bugs": "https://github.com/benplum/Roller/issues",
+  "homepage": "http://formstone.it/roller/"
 }
