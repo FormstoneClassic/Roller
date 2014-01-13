@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.7 - 2014-01-13 
+ * Roller v3.0.8 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -77,11 +77,11 @@
 						if (data.viewport) {
 							data.$items.unwrap();
 						}
-					}
-					if (data.canister) {
-						data.$items.unwrap();
-					} else {
-						data.$canister.attr("style", null);
+						if (data.canister) {
+							data.$items.unwrap();
+						} else {
+							data.$canister.attr("style", null);
+						}
 					}
 
 					data.$items.removeClass("visible");
@@ -233,6 +233,7 @@
 						}
 						data.$pagination.html(html);
 					}
+
 					if (data.pageCount < 1) {
 						data.$controls.removeClass("visible");
 						data.$pagination.removeClass("visible");
@@ -299,12 +300,12 @@
 		if (!$roller.data("roller")) {
 			opts = $.extend({}, opts, $roller.data("roller-options"));
 
-			// Verify viewport and canister are available
-			if (!$roller.find(".roller-canister").length) {
-				$roller.wrapInner('<div class="roller-canister"></div>');
-				opts.canister = true;
-			}
 			if (!opts.single) {
+				// Verify viewport and canister are available
+				if (!$roller.find(".roller-canister").length) {
+					$roller.wrapInner('<div class="roller-canister"></div>');
+					opts.canister = true;
+				}
 				if (!$roller.find(".roller-viewport").length) {
 					$roller.wrapInner('<div class="roller-viewport"></div>');
 					opts.viewport = true;
@@ -346,7 +347,7 @@
 				touchEnd: 0
 			}, opts);
 
-			data.$items = data.$canister.children(".roller-item");
+			data.$items = (data.single) ? data.$roller.find(".roller-item") : data.$canister.children(".roller-item");
 			data.$captionItems = data.$captions.find(".roller-caption");
 			data.$controlItems = data.$controls.find(".roller-control");
 			data.$paginationItems = data.$pagination.find(".roller-page");
