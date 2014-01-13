@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.3 - 2014-01-12 
+ * Roller v3.0.4 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -8,7 +8,7 @@
 
 ;(function ($, window) {
 	"use strict";
-	
+
 	/**
 	 * @options
 	 * @param auto [boolean] <false> "Flag to auto advance items"
@@ -38,28 +38,28 @@
 		touchPaged: true,
 		useMargin: false
 	};
-	
+
 	/**
 	 * @events
 	 * @event update.roller "Canister position updated"
 	 */
-	
+
 	var pub = {
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name defaults
 		 * @description Sets default plugin options
 		 * @param opts [object] <{}> "Options object"
-		 * @example $(".target").roller("defaults", opts);
+		 * @example $.roller("defaults", opts);
 		 */
 		defaults: function(opts) {
 			options = $.extend(options, opts || {});
 			return $(this);
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name destroy
 		 * @description Removes instance of plugin
 		 * @example $(".target").roller("destroy");
@@ -67,9 +67,9 @@
 		destroy: function() {
 			return $(this);
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name disable
 		 * @description Disables instance of plugin
 		 * @example $(".target").roller("disable");
@@ -77,36 +77,36 @@
 		disable: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				
+
 				if (typeof data !== "undefined" && data.enabled) {
 					_clearTimer(data.autoTimer);
-					
+
 					data.enabled = false;
-					
+
 					data.$roller.removeClass("enabled")
 								.off("touchstart.roller click.roller");
-					
+
 					data.$canister.attr("style", "")
 								  .css( _prefix("transition", "none") )
 								  .off("touchstart.roller");
-					
+
 					data.$controls.removeClass("visible");
 					data.$pagination.removeClass("visible")
 									.html("");
-					
+
 					if (data.useMargin) {
 						data.$canister.css({ marginLeft: "" });
 					} else {
 						data.$canister.css( _prefix("transform", "translate3d(0px, 0, 0)") );
 					}
-					
+
 					data.index = 0;
 				}
 			});
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name enable
 		 * @description Enables instance of plugin
 		 * @example $(".target").roller("enable");
@@ -114,27 +114,27 @@
 		enable: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				
+
 				if (typeof data !== "undefined" && !data.enabled) {
 					data.enabled = true;
-					
+
 					data.$roller.addClass("enabled")
 								.on("touchstart.roller click.roller", ".roller-control", data, _onAdvance)
 								.on("touchstart.roller click.roller", ".roller-page", data, _onSelect);
-					
+
 					data.$canister.css( _prefix("transition", "") );
-					
+
 					pub.resize.apply(data.$roller);
-					
+
 					if (!data.single) {
 						data.$canister.on("touchstart.roller", data, _onTouchStart);
 					}
 				}
 			});
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name jump
 		 * @description Jump instance of plugin to specific page
 		 * @example $(".target").roller("jump", 1);
@@ -142,16 +142,16 @@
 		jump: function(index) {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				
+
 				if (typeof data !== "undefined" && data.enabled) {
 					_clearTimer(data.autoTimer);
 					_position(data, index-1);
 				}
 			});
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name resize
 		 * @description Resizes each instance
 		 * @example $(".target").roller("resize");
@@ -159,11 +159,11 @@
 		resize: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				
+
 				if (typeof data !== "undefined" && data.enabled) {
 					data.count = data.$items.length;
 					data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
-					
+
 					if (data.single) {
 						data.perPage = 1;
 						data.pageCount = data.count - 1;
@@ -185,12 +185,12 @@
 						data.pageMove = data.itemWidth * data.perPage;
 						data.maxWidth = data.itemWidth * data.count;
 					}
-					
+
 					data.maxMove = -data.maxWidth + data.viewportWidth + data.itemMargin;
 					if (data.maxMove > 0) {
 						data.maxMove = 0;
 					}
-					
+
 					// Reset Page Count
 					if (data.pageCount !== "Infinity") {
 						var html = '';
@@ -207,18 +207,18 @@
 						data.$pagination.addClass("visible");
 					}
 					data.$paginationItems = data.$roller.find(".roller-page");
-					
+
 					if (!data.single) {
 						data.$canister.css({ width: data.maxWidth });
 					}
-					
+
 					_position(data, _calculateIndex(data));
 				}
 			});
 		},
-		
+
 		/**
-		 * @method 
+		 * @method
 		 * @name reset
 		 * @description Resets instance after item change
 		 * @example $(".target").roller("reset");
@@ -226,7 +226,7 @@
 		reset: function() {
 			return $(this).each(function() {
 				var data = $(this).data("roller");
-				
+
 				if (typeof data !== "undefined" && data.enabled) {
 					data.$items = data.$roller.find(".roller-item");
 					pub.resize.apply(data.$roller);
@@ -234,7 +234,7 @@
 			});
 		}
 	};
-	
+
 	/**
 	 * @method private
 	 * @name _init
@@ -244,16 +244,16 @@
 	function _init(opts) {
 		// Settings
 		opts = $.extend({}, options, opts);
-		
+
 		// Apply to each element
 		var $items = $(this);
 		for (var i = 0, count = $items.length; i < count; i++) {
 			_build($items.eq(i), opts);
 		}
-		
+
 		return $items;
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _build
@@ -264,7 +264,7 @@
 	function _build($roller, opts) {
 		if (!$roller.data("roller")) {
 			opts = $.extend({}, opts, $roller.data("roller-options"));
-			
+
 			var html = '';
 			if (opts.controls) {
 				html += '<div class="roller-controls">';
@@ -276,11 +276,11 @@
 				html += '<div class="roller-pagination">';
 				html += '</div>';
 			}
-			
+
 			$roller.addClass("roller")
 				   .wrapInner('<div class="roller-viewport"><div class="roller-canister"></div></div>')
 				   .append(html);
-			
+
 			var data = $.extend({}, {
 				$roller: $roller,
 				$viewport: $roller.find(".roller-viewport").eq(0),
@@ -298,22 +298,22 @@
 				touchstart: 0,
 				touchEnd: 0
 			}, opts);
-			
+
 			data.$items = data.$canister.children(".roller-item");
 			data.$captionItems = data.$captions.find(".roller-caption");
 			data.$controlItems = data.$controls.find(".roller-control");
 			data.$paginationItems = data.$pagination.find(".roller-page");
 			data.$images = data.$canister.find("img");
-			
+
 			data.totalImages = data.$images.length;
-			
+
 			if (data.single) {
 				data.$roller.addClass("roller-single");
 			}
-			
+
 			$roller.data("roller", data)
 				   .addClass("initialized");
-			
+
 			//pub.enable.apply(data.$roller);
 			// Navtive MQ Support
 			if (window.matchMedia !== undefined) {
@@ -325,7 +325,7 @@
 				});
 				_onRespond.apply(data.$roller);
 			}
-			
+
 			// Watch images
 			if (data.totalImages > 0) {
 				data.loadedImages = 0;
@@ -337,16 +337,16 @@
 					}
 				}
 			}
-			
+
 			// Auto timer
 			if (data.auto) {
-				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() { 
+				data.autoTimer = _startTimer(data.autoTimer, data.autoTime, function() {
 					_autoAdvance(data);
 				}, true);
 			}
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onImageLoad
@@ -360,7 +360,7 @@
 			pub.resize.apply(data.$roller);
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onTouchStart
@@ -369,22 +369,22 @@
 	 */
 	function _onTouchStart(e) {
 		e.stopPropagation();
-		
+
 		var data = e.data;
-		
+
 		_clearTimer(data.autoTimer);
-		
+
 		data.touchStart = new Date().getTime();
 		data.$canister.css( _prefix("transition", "none") );
-		
+
 		var touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
 		data.xStart = (touch) ? touch.pageX : e.clientX;
 		data.yStart = (touch) ? touch.pageY : e.clientY;
-		
+
 		data.$canister.on("touchmove.roller", data, _onTouchMove)
 					  .one("touchend.roller touchcancel.roller", data, _onTouchEnd);
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onTouchMove
@@ -393,17 +393,17 @@
 	 */
 	function _onTouchMove(e) {
 		e.stopPropagation();
-		
+
 		var data = e.data,
 			touch = (typeof e.originalEvent.targetTouches !== "undefined") ? e.originalEvent.targetTouches[0] : null;
-		
+
 		data.deltaX = data.xStart - ((touch) ? touch.pageX : e.clientX);
 		data.deltaY = data.yStart - ((touch) ? touch.pageY : e.clientY);
-		
+
 		if (data.deltaX < -10 || data.deltaX > 10) {
 			e.preventDefault();
 		}
-		
+
 		data.touchLeft = data.leftPosition - data.deltaX;
 		if (data.touchLeft > 0) {
 			data.touchLeft = 0;
@@ -411,14 +411,14 @@
 		if (data.touchLeft < data.maxMove) {
 			data.touchLeft = data.maxMove;
 		}
-		
+
 		if (data.useMargin) {
 			data.$canister.css({ marginLeft: data.touchLeft });
 		} else {
 			data.$canister.css( _prefix("transform", "translate3d("+data.touchLeft+"px, 0, 0)") );
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onTouchEnd
@@ -427,15 +427,15 @@
 	 */
 	function _onTouchEnd(e) {
 		var data = e.data;
-		
+
 		data.touchEnd = new Date().getTime();
 		data.leftPosition = data.touchLeft;
 		data.$canister.css( _prefix("transition", "") );
-		
+
 		data.$canister.off("touchmove.roller touchend.roller touchcancel.roller");
-		
+
 		var index = _calculateIndex(data);
-		
+
 		if (data.touchPaged && !data.swipe) {
 			_position(data, index);
 		} else {
@@ -446,7 +446,7 @@
 		data.touchStart = 0;
 		data.touchEnd = 0;
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _autoAdvance
@@ -460,7 +460,7 @@
 		}
 		_position(data, index);
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onAdvance
@@ -470,14 +470,14 @@
 	function _onAdvance(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		
+
 		var data = e.data,
 			index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
-		
+
 		_clearTimer(data.autoTimer);
 		_position(data, index);
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onSelect
@@ -487,14 +487,14 @@
 	function _onSelect(e) {
 		e.preventDefault();
 		e.stopPropagation();
-		
+
 		var data = e.data,
 			index = data.$paginationItems.index($(e.currentTarget));
-		
+
 		_clearTimer(data.autoTimer);
 		_position(data, index);
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _position
@@ -509,7 +509,7 @@
 		if (index > data.pageCount) {
 			index = data.pageCount;
 		}
-		
+
 		if (data.single) {
 			data.$items.removeClass("active")
 					   .eq(index)
@@ -523,25 +523,25 @@
 			} else {
 				data.leftPosition = -(index * data.pageMove);
 			}
-			
-			if (data.leftPosition < data.maxMove) { 
-				data.leftPosition = data.maxMove; 
+
+			if (data.leftPosition < data.maxMove) {
+				data.leftPosition = data.maxMove;
 			}
-			
+
 			if (data.useMargin) {
 				data.$canister.css({ marginLeft: data.leftPosition });
 			} else {
 				data.$canister.css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
 			}
 		}
-		
+
 		data.index = index;
-		
+
 		_updateControls(data);
-		
+
 		data.$roller.trigger("update.roller");
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _updateControls
@@ -551,10 +551,10 @@
 	function _updateControls(data) {
 		data.$captionItems.filter(".active").removeClass("active");
 		data.$captionItems.eq(data.index).addClass("active");
-		
+
 		data.$paginationItems.filter(".active").removeClass("active");
 		data.$paginationItems.eq(data.index).addClass("active");
-		
+
 		data.$items.removeClass("visible");
 		if (!data.single && data.perPage !== "Infinity") {
 			for (var i = 0; i < data.perPage; i++) {
@@ -565,7 +565,7 @@
 				}
 			}
 		}
-		
+
 		if (data.pageCount <= 0) {
 			data.$controlItems.removeClass("enabled");
 		} else {
@@ -577,7 +577,7 @@
 			}
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _onRespond
@@ -585,14 +585,14 @@
 	 */
 	function _onRespond() {
 		var data = $(this).data("roller");
-		
+
 		if (data.mediaQuery.matches) {
 			pub.enable.apply(data.$roller);
 		} else {
 			pub.disable.apply(data.$roller);
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _calculateIndex
@@ -616,11 +616,11 @@
 				data.$items.each(function(i) {
 					var offset = $(this).position(),
 						check = offset.left + data.leftPosition;
-					
+
 					if (check < 0) {
 						check = -check;
 					}
-					
+
 					if (check < goal) {
 						goal = check;
 						index = i;
@@ -633,7 +633,7 @@
 			return Math.round( -data.leftPosition / data.viewportWidth);
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _prefix
@@ -644,16 +644,16 @@
 	 */
 	function _prefix(property, value) {
 		var r = {};
-		
+
 		r["-webkit-" + property] = value;
 		r[   "-moz-" + property] = value;
 		r[    "-ms-" + property] = value;
 		r[     "-o-" + property] = value;
 		r[             property] = value;
-		
+
 		return r;
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _startTimer
@@ -671,7 +671,7 @@
 			return setTimeout(func, time);
 		}
 	}
-	
+
 	/**
 	 * @method private
 	 * @name _clearTimer
@@ -684,7 +684,7 @@
 			timer = null;
 		}
 	}
-	
+
 	$.fn.roller = function(method) {
 		if (pub[method]) {
 			return pub[method].apply(this, Array.prototype.slice.call(arguments, 1));
@@ -692,5 +692,11 @@
 			return _init.apply(this, arguments);
 		}
 		return this;
+	};
+
+	$.roller = function(method) {
+		if (method === "defaults") {
+			pub.defaults.apply(this, Array.prototype.slice.call(arguments, 1));
+		}
 	};
 })(jQuery, window);
