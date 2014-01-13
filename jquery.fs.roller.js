@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.5 - 2014-01-13 
+ * Roller v3.0.6 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -27,6 +27,7 @@
 	var options = {
 		auto: false,
 		autoTime: 8000,
+		//canister: true, * @param canister [boolean] <true> "Flag to draw canister"
 		controls: true,
 		customClass: "",
 		duration: 500,
@@ -37,6 +38,7 @@
 		single: false,
 		touchPaged: true,
 		useMargin: false
+		//viewport: true * @param viewport [boolean] <true> "Flag to draw viewport"
 	};
 
 	/**
@@ -71,11 +73,23 @@
 				if (typeof data !== "undefined") {
 					_clearTimer(data.autoTimer);
 
+					if (data.viewport) {
+						data.$items.unwrap();
+					}
+					if (data.canister) {
+						data.$items.unwrap();
+					} else {
+						data.$canister.attr("style", null);
+					}
 
-					data.$pagination.remove();
-					data.$controls.remove();
-					data.$items.removeClass("visible")
-							   .unwrap().unwrap();
+					data.$items.removeClass("visible");
+
+					if (data.pagination) {
+						data.$pagination.remove();
+					}
+					if (data.controls) {
+						data.$controls.remove();
+					}
 
 					data.$roller.removeClass("roller enabled " + (data.single ? "single " : "") + data.customClass)
 								.off(".roller")
@@ -281,20 +295,31 @@
 		if (!$roller.data("roller")) {
 			opts = $.extend({}, opts, $roller.data("roller-options"));
 
+			// Verify viewport and canister are available
+			if (!$roller.find(".roller-canister").length/*  || opts.canister */) {
+				$roller.wrapInner('<div class="roller-canister"></div>');
+				opts.canister = true;
+			}
+			if (!$roller.find(".roller-viewport").length/*  || opts.viewport */) {
+				$roller.wrapInner('<div class="roller-viewport"></div>');
+				opts.viewport = true;
+			}
+
+			// Build controls and pagination
 			var html = '';
-			if (opts.controls) {
+			if (opts.controls && !$roller.find(".roller-controls").length) {
 				html += '<div class="roller-controls">';
 				html += '<span class="roller-control previous">Previous</span>';
 				html += '<span class="roller-control next">Next</span>';
 				html += '</div>';
 			}
-			if (opts.pagination) {
+			if (opts.pagination && !$roller.find(".roller-pagination").length) {
 				html += '<div class="roller-pagination">';
 				html += '</div>';
 			}
 
+			// Modify target
 			$roller.addClass("roller " + (opts.single ? "single " : "") + opts.customClass)
-				   .wrapInner('<div class="roller-viewport"><div class="roller-canister"></div></div>')
 				   .append(html);
 
 			var data = $.extend({}, {
