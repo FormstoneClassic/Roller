@@ -51,5 +51,5 @@
 	.roller .roller-caption.active { display: block; }
 
 	/* !Single */
-	.roller-single .roller-item { display: none; }
-	.roller-single .roller-item.active { display: block; }
+	.roller.single .roller-item { display: none; }
+	.roller.single .roller-item.active { display: block; }

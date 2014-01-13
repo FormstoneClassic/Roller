@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.4 - 2014-01-13 
+ * Roller v3.0.5 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -65,7 +65,23 @@
 		 * @example $(".target").roller("destroy");
 		 */
 		destroy: function() {
-			return $(this);
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+
+				if (typeof data !== "undefined") {
+					_clearTimer(data.autoTimer);
+
+
+					data.$pagination.remove();
+					data.$controls.remove();
+					data.$items.removeClass("visible")
+							   .unwrap().unwrap();
+
+					data.$roller.removeClass("roller enabled " + (data.single ? "single " : "") + data.customClass)
+								.off(".roller")
+								.data("roller", null);
+				}
+			});
 		},
 
 		/**
@@ -277,7 +293,7 @@
 				html += '</div>';
 			}
 
-			$roller.addClass("roller")
+			$roller.addClass("roller " + (opts.single ? "single " : "") + opts.customClass)
 				   .wrapInner('<div class="roller-viewport"><div class="roller-canister"></div></div>')
 				   .append(html);
 
@@ -307,12 +323,7 @@
 
 			data.totalImages = data.$images.length;
 
-			if (data.single) {
-				data.$roller.addClass("roller-single");
-			}
-
-			$roller.data("roller", data)
-				   .addClass("initialized");
+			$roller.data("roller", data);
 
 			//pub.enable.apply(data.$roller);
 			// Navtive MQ Support
