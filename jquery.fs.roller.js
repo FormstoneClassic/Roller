@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.6 - 2014-01-13 
+ * Roller v3.0.7 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -73,8 +73,10 @@
 				if (typeof data !== "undefined") {
 					_clearTimer(data.autoTimer);
 
-					if (data.viewport) {
-						data.$items.unwrap();
+					if (!data.single) {
+						if (data.viewport) {
+							data.$items.unwrap();
+						}
 					}
 					if (data.canister) {
 						data.$items.unwrap();
@@ -192,20 +194,22 @@
 
 				if (typeof data !== "undefined" && data.enabled) {
 					data.count = data.$items.length;
-					data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
+					//data.viewportWidth = (data.$viewport.length > 0) ? data.$viewport.outerWidth(false) : data.$roller.outerWidth(false);
+					data.viewportWidth = data.$viewport.outerWidth(false);
+					data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
 
 					if (data.single) {
 						data.perPage = 1;
 						data.pageCount = data.count - 1;
 					} else if (data.paged) {
-						data.maxWidth = 0;
+						data.canisterWidth = 0;
 						for (var i = 0; i < data.count; i++) {
-							data.maxWidth += data.$items.eq(i).outerWidth(true);
+							data.canisterWidth += data.$items.eq(i).outerWidth() + data.itemMargin;
 						}
 						data.perPage = 1;
-						data.pageCount = (data.maxWidth > data.viewportWidth) ? data.count - 1 : 0;
+						data.pageCount = (data.canisterWidth > data.viewportWidth) ? data.count - 1 : 0;
 					} else {
-						data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
+						//data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
 						data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
 						data.perPage = Math.floor(data.viewportWidth / data.itemWidth);
 						if (data.perPage < 1) {
@@ -213,10 +217,10 @@
 						}
 						data.pageCount = Math.ceil(data.count / data.perPage) - 1;
 						data.pageMove = data.itemWidth * data.perPage;
-						data.maxWidth = data.itemWidth * data.count;
+						data.canisterWidth = data.itemWidth * data.count;
 					}
 
-					data.maxMove = -data.maxWidth + data.viewportWidth + data.itemMargin;
+					data.maxMove = -data.canisterWidth + data.viewportWidth + data.itemMargin;
 					if (data.maxMove > 0) {
 						data.maxMove = 0;
 					}
@@ -239,7 +243,7 @@
 					data.$paginationItems = data.$roller.find(".roller-page");
 
 					if (!data.single) {
-						data.$canister.css({ width: data.maxWidth });
+						data.$canister.css({ width: data.canisterWidth });
 					}
 
 					_position(data, _calculateIndex(data));
@@ -296,13 +300,15 @@
 			opts = $.extend({}, opts, $roller.data("roller-options"));
 
 			// Verify viewport and canister are available
-			if (!$roller.find(".roller-canister").length/*  || opts.canister */) {
+			if (!$roller.find(".roller-canister").length) {
 				$roller.wrapInner('<div class="roller-canister"></div>');
 				opts.canister = true;
 			}
-			if (!$roller.find(".roller-viewport").length/*  || opts.viewport */) {
-				$roller.wrapInner('<div class="roller-viewport"></div>');
-				opts.viewport = true;
+			if (!opts.single) {
+				if (!$roller.find(".roller-viewport").length) {
+					$roller.wrapInner('<div class="roller-viewport"></div>');
+					opts.viewport = true;
+				}
 			}
 
 			// Build controls and pagination

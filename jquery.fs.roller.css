@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.6 - 2014-01-13 
+ * Roller v3.0.7 - 2014-01-13 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -19,7 +19,7 @@
 	.roller,
 	.roller .roller-viewport { position: relative; }
 	.roller { width: 100%; }
-	.roller .roller-viewport { height: 100%; width: 100%; }
+	/* .roller .roller-viewport { height: 100%; width: 100%; } */
 	.roller .roller-canister { overflow: hidden; position: relative;
 		-webkit-transition: -webkit-transform 0.4s ease;
 		   -moz-transition:    -moz-transform 0.4s ease;
