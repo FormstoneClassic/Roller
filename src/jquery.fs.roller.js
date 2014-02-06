@@ -62,7 +62,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null) {
+				if (data) {
 					_clearTimer(data.autoTimer);
 
 					if (!data.single) {
@@ -102,7 +102,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null && data.enabled) {
+				if (data && data.enabled) {
 					_clearTimer(data.autoTimer);
 
 					data.enabled = false;
@@ -139,7 +139,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null && !data.enabled) {
+				if (data && !data.enabled) {
 					data.enabled = true;
 
 					data.$roller.addClass("enabled")
@@ -167,7 +167,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null && data.enabled) {
+				if (data && data.enabled) {
 					_clearTimer(data.autoTimer);
 					_position(data, index-1);
 				}
@@ -184,7 +184,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null && data.enabled) {
+				if (data && data.enabled) {
 					data.count = data.$items.length;
 					data.viewportWidth = data.$viewport.outerWidth(false);
 					data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
@@ -252,7 +252,7 @@
 			return $(this).each(function() {
 				var data = $(this).data("roller");
 
-				if (data !== null && data.enabled) {
+				if (data && data.enabled) {
 					data.$items = data.$roller.find(".roller-item");
 					pub.resize.apply(data.$roller);
 				}
