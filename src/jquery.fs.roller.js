@@ -474,7 +474,8 @@
 
 		data.$canister.off("touchmove.roller touchend.roller touchcancel.roller");
 
-		var index = _calculateIndex(data);
+		// only update index if we actually moved
+		var index = (data.deltaX > -10 && data.deltaX < 10) ? data.index : _calculateIndex(data);
 
 		if (data.touchPaged && !data.swipe) {
 			_position(data, index);
