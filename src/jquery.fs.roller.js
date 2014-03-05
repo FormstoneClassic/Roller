@@ -590,7 +590,7 @@
 
 		_updateControls(data);
 
-		data.$roller.trigger("update.roller");
+		data.$roller.trigger("update.roller", [ data.index ]);
 	}
 
 	/**
