@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.14 - 2014-03-04 
+ * Roller v3.0.15 - 2014-03-05 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -252,7 +252,7 @@
 						data.$canister.css({ width: data.canisterWidth });
 					}
 
-					_position(data, _calculateIndex(data));
+					_position(data, _calculateIndex(data), false);
 				}
 			});
 		},
@@ -551,7 +551,7 @@
 	 * @param data [object] "Instance data"
 	 * @param index [int] "Item index"
 	 */
-	function _position(data, index) {
+	function _position(data, index, animate) {
 		if (index < 0) {
 			index = (data.infinite) ? data.pageCount : 0;
 		}
@@ -580,7 +580,17 @@
 			if (data.useMargin) {
 				data.$canister.css({ marginLeft: data.leftPosition });
 			} else {
-				data.$canister.css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
+				if (animate === false) {
+					data.$canister.css( _prefix("transition", "none") )
+								  .css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
+
+					// Slight delay before adding transitions backs
+					data.resizeTimer = _startTimer(data.resizeTimer, 5, function() {
+						data.$canister.css( _prefix("transition", "") );
+					}, false);
+				} else {
+					data.$canister.css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
+				}
 			}
 		}
 
