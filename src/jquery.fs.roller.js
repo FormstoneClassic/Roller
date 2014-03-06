@@ -584,13 +584,12 @@
 			}
 		}
 
+		if (index !== data.index && animate !== false) {
+			data.$roller.trigger("update.roller", [ data.index ]);
+		}
 		data.index = index;
 
 		_updateControls(data);
-
-		if (!animate) {
-			data.$roller.trigger("update.roller", [ data.index ]);
-		}
 	}
 
 	/**
