@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.16 - 2014-03-05 
+ * Roller v3.0.17 - 2014-03-06 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -16,7 +16,6 @@
 	 * @param autoWidth [boolean] <false> "Flag to fit items to viewport width"
 	 * @param controls [boolean] <true> "Flag to draw controls"
 	 * @param customClass [string] <''> "Class applied to instance"
-	 * @param duration [int] <500> "Animation duration; should match CSS animation time"
 	 * @param maxWidth [string] <'Infinity'> "Width at which to auto-disable plugin"
 	 * @param minWidth [string] <'0'> "Width at which to auto-disable plugin"
 	 * @param paged [boolean] <false> "Flag for paged items"
@@ -32,7 +31,6 @@
 		//canister: true, * @param canister [boolean] <true> "Flag to draw canister"
 		controls: true,
 		customClass: "",
-		duration: 500,
 		infinite: false,
 		maxWidth: Infinity,
 		minWidth: '0px',
@@ -598,7 +596,9 @@
 
 		_updateControls(data);
 
-		data.$roller.trigger("update.roller", [ data.index ]);
+		if (!animate) {
+			data.$roller.trigger("update.roller", [ data.index ]);
+		}
 	}
 
 	/**
