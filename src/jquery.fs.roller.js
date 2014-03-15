@@ -352,7 +352,6 @@
 
 			$roller.data("roller", data);
 
-			//pub.enable.apply(data.$roller);
 			// Navtive MQ Support
 			if (window.matchMedia !== undefined) {
 				data.maxWidth = data.maxWidth === Infinity ? "100000px" : data.maxWidth;
