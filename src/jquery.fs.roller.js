@@ -226,7 +226,7 @@
 					}
 
 					// Reset Page Count
-					if (data.pageCount !== "Infinity") {
+					if (data.pageCount !== Infinity) {
 						var html = '';
 						for (var j = 0; j <= data.pageCount; j++) {
 							html += '<span class="roller-page">' + (j + 1) + '</span>';
@@ -611,7 +611,7 @@
 		data.$paginationItems.eq(data.index).addClass("active");
 
 		data.$items.removeClass("visible");
-		if (!data.single && data.perPage !== "Infinity") {
+		if (!data.single && data.perPage !== Infinity) {
 			for (var i = 0; i < data.perPage; i++) {
 				if (data.leftPosition === data.maxMove) {
 					data.$items.eq(data.count - 1 - i).addClass("visible");
