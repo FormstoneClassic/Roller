@@ -192,6 +192,11 @@
 
 				if (data && data.enabled) {
 					data.count = data.$items.length;
+
+					if (data.count < 1) { // avoid empty rollers
+						return;
+					}
+
 					data.viewportWidth = data.$viewport.outerWidth(false);
 					data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
 
