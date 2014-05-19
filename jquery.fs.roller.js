@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.23 - 2014-05-16 
+ * Roller v3.0.24 - 2014-05-19 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -583,6 +583,10 @@
 
 			if (data.leftPosition < data.maxMove) {
 				data.leftPosition = data.maxMove;
+			}
+
+			if (isNaN(data.leftPosition)) {
+				data.leftPosition = 0;
 			}
 
 			if (data.useMargin) {

@@ -577,6 +577,10 @@
 				data.leftPosition = data.maxMove;
 			}
 
+			if (isNaN(data.leftPosition)) {
+				data.leftPosition = 0;
+			}
+
 			if (data.useMargin) {
 				data.$canister.css({ marginLeft: data.leftPosition });
 			} else {
