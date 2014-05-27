@@ -23,7 +23,7 @@
 		     -o-transform: translate3d(0, 0, 0);
 		        transform: translate3d(0, 0, 0);
 	}
-	.roller .roller-item { float: left; }
+	.roller .roller-item { float: left; margin: 0; }
 
 	.roller .roller-canister,
 	.roller .roller-item {
