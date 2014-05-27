@@ -19,8 +19,7 @@
 	.roller,
 	.roller .roller-viewport { position: relative; }
 	.roller { width: 100%; }
-	/* .roller .roller-viewport { height: 100%; width: 100%; } */
-	.roller .roller-canister { overflow: hidden; position: relative;
+	.roller .roller-canister { margin: 0; overflow: hidden; position: relative;
 		-webkit-transition: -webkit-transform 0.4s ease;
 		   -moz-transition:    -moz-transform 0.4s ease;
 		    -ms-transition:     -ms-transform 0.4s ease;
