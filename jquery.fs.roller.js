@@ -1,5 +1,5 @@
 /* 
- * Roller v3.0.24 - 2014-05-19 
+ * Roller v3.1.0 - 2014-05-27 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -312,6 +312,11 @@
 	function _build($roller, opts) {
 		if (!$roller.data("roller")) {
 			opts = $.extend({}, opts, $roller.data("roller-options"));
+
+			// Legacy browser support
+			if (!opts.useMargin && !_supports3D()) {
+				opts.useMargin = true;
+			}
 
 			if (!opts.single) {
 				// Verify viewport and canister are available
@@ -758,6 +763,26 @@
 			timer = null;
 		}
 	}
+
+	/**
+	 * @method private
+	 * @name _supports3D
+	 * @description Check for translate3d support
+	 */
+	function _supports3D() {
+		/* http://stackoverflow.com/questions/11628390/how-to-detect-css-translate3d-without-the-webkit-context */
+		var prop = "transform",
+			val = "translate3d(0px, 0px, 0px)",
+			test = /translate3d\(0px, 0px, 0px\)/g,
+			$div = $("div");
+
+		$div.css(_prefix(prop, val));
+
+		var check = $div[0].style.cssText.match(test);
+
+		return (check !== null && check.length === 1);
+	}
+
 
 	$.fn.roller = function(method) {
 		if (pub[method]) {
