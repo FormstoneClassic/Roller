@@ -306,7 +306,7 @@
 			opts = $.extend({}, opts, $roller.data("roller-options"));
 
 			// Legacy browser support
-			if (!opts.useMargin && !_supports3D()) {
+			if (!opts.useMargin && !_getTransform3DSupport()) {
 				opts.useMargin = true;
 			}
 
@@ -758,15 +758,16 @@
 
 	/**
 	 * @method private
-	 * @name _supports3D
-	 * @description Check for translate3d support
+	 * @name _getTransform3DSupport
+	 * @description Determines if transforms are support
+	 * @return [boolean] "True if transforms supported"
 	 */
-	function _supports3D() {
+	function _getTransform3DSupport() {
 		/* http://stackoverflow.com/questions/11628390/how-to-detect-css-translate3d-without-the-webkit-context */
 		var prop = "transform",
 			val = "translate3d(0px, 0px, 0px)",
 			test = /translate3d\(0px, 0px, 0px\)/g,
-			$div = $("div");
+			$div = $("<div>");
 
 		$div.css(_prefix(prop, val));
 
