@@ -1,5 +1,5 @@
 /* 
- * Roller v3.1.2 - 2014-05-29 
+ * Roller v3.1.3 - 2014-05-29 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -611,6 +611,17 @@
 			}
 		}
 
+		data.$items.removeClass("visible");
+		if (!data.single && data.perPage !== Infinity) {
+			for (var i = 0; i < data.perPage; i++) {
+				if (data.leftPosition === data.maxMove) {
+					data.$items.eq(data.count - 1 - i).addClass("visible");
+				} else {
+					data.$items.eq((data.perPage * index) + i).addClass("visible");
+				}
+			}
+		}
+
 		_updateControls(data);
 
 		if (index !== data.index && animate !== false) {
@@ -631,17 +642,6 @@
 
 		data.$paginationItems.filter(".active").removeClass("active");
 		data.$paginationItems.eq(data.index).addClass("active");
-
-		data.$items.removeClass("visible");
-		if (!data.single && data.perPage !== Infinity) {
-			for (var i = 0; i < data.perPage; i++) {
-				if (data.leftPosition === data.maxMove) {
-					data.$items.eq(data.count - 1 - i).addClass("visible");
-				} else {
-					data.$items.eq((data.perPage * data.index) + i).addClass("visible");
-				}
-			}
-		}
 
 		if (data.infinite) {
 			data.$controlItems.addClass("enabled");

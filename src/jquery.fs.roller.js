@@ -603,6 +603,17 @@
 			}
 		}
 
+		data.$items.removeClass("visible");
+		if (!data.single && data.perPage !== Infinity) {
+			for (var i = 0; i < data.perPage; i++) {
+				if (data.leftPosition === data.maxMove) {
+					data.$items.eq(data.count - 1 - i).addClass("visible");
+				} else {
+					data.$items.eq((data.perPage * index) + i).addClass("visible");
+				}
+			}
+		}
+
 		_updateControls(data);
 
 		if (index !== data.index && animate !== false) {
@@ -623,17 +634,6 @@
 
 		data.$paginationItems.filter(".active").removeClass("active");
 		data.$paginationItems.eq(data.index).addClass("active");
-
-		data.$items.removeClass("visible");
-		if (!data.single && data.perPage !== Infinity) {
-			for (var i = 0; i < data.perPage; i++) {
-				if (data.leftPosition === data.maxMove) {
-					data.$items.eq(data.count - 1 - i).addClass("visible");
-				} else {
-					data.$items.eq((data.perPage * data.index) + i).addClass("visible");
-				}
-			}
-		}
 
 		if (data.infinite) {
 			data.$controlItems.addClass("enabled");
