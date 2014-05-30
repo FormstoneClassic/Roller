@@ -603,12 +603,12 @@
 			}
 		}
 
+		_updateControls(data);
+
 		if (index !== data.index && animate !== false) {
 			data.$roller.trigger("update.roller", [ index ]);
 		}
 		data.index = index;
-
-		_updateControls(data);
 	}
 
 	/**
