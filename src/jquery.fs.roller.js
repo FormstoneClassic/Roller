@@ -637,7 +637,7 @@
 
 		if (data.infinite) {
 			data.$controlItems.addClass("enabled");
-		} else if (data.pageCount <= 0) {
+		} else if (data.pageCount <= 1) {
 			data.$controlItems.removeClass("enabled");
 		} else {
 			data.$controlItems.addClass("enabled");
