@@ -221,6 +221,9 @@
 							data.perPage = 1;
 						}
 						data.pageCount = Math.ceil(data.count / data.perPage) - 1;
+						if (data.count > data.perPage && data.pageCount === 1) {
+							data.pageCount++;
+						}
 						data.pageMove = data.itemWidth * data.perPage;
 						data.canisterWidth = data.itemWidth * data.count;
 					}
