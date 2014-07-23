@@ -776,7 +776,7 @@
 
 		var check = $div[0].style.cssText.match(test);
 
-		return (check !== null && check.length === 1);
+		return (check !== null && check.length > 0);
 	}
 
 
