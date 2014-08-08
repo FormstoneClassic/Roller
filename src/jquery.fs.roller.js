@@ -229,8 +229,9 @@
 					}
 
 					data.maxMove = -data.canisterWidth + data.viewportWidth + data.itemMargin;
-					if (data.maxMove > 0) {
+					if (data.maxMove >= 0) {
 						data.maxMove = 0;
+						data.pageCount = 1;
 					}
 
 					// Reset Page Count
