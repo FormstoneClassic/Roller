@@ -1,5 +1,5 @@
 /* 
- * Roller v3.1.9 - 2014-08-08 
+ * Roller v3.1.9 - 2014-08-11 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -367,7 +367,9 @@
 				yStart: 0,
 				enabled: false,
 				touchstart: 0,
-				touchEnd: 0
+				touchEnd: 0,
+				touchTimer: null,
+				hasTouched: false
 			}, opts);
 
 			data.$items = (data.single) ? data.$roller.find(".roller-item") : data.$canister.children(".roller-item");
@@ -540,8 +542,17 @@
 		var data = e.data,
 			index = data.index + (($(e.currentTarget).hasClass("next")) ? 1 : -1);
 
-		_clearTimer(data.autoTimer);
-		_position(data, index);
+		if (!data.hasTouched) {
+			_clearTimer(data.autoTimer);
+			_position(data, index);
+		}
+
+		if (e.type === "touchstart") {
+			data.hasTouched = true;
+			data.touchTimer = _startTimer(data.touchTimer, 500, function() {
+				data.hasTouched = false;
+			});
+		}
 	}
 
 	/**
