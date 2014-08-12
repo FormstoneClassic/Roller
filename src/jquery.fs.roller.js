@@ -243,7 +243,7 @@
 						data.$pagination.html(html);
 					}
 
-					if (data.pageCount < 1) {
+					if (data.pageCount <= 1) {
 						data.$controls.removeClass("visible");
 						data.$pagination.removeClass("visible");
 					} else {

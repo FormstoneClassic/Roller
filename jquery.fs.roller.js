@@ -1,5 +1,5 @@
 /* 
- * Roller v3.1.9 - 2014-08-11 
+ * Roller v3.1.11 - 2014-08-12 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -251,7 +251,7 @@
 						data.$pagination.html(html);
 					}
 
-					if (data.pageCount < 1) {
+					if (data.pageCount <= 1) {
 						data.$controls.removeClass("visible");
 						data.$pagination.removeClass("visible");
 					} else {
