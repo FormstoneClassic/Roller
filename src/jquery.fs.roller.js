@@ -629,10 +629,11 @@
 			}
 		}
 
-		if (index !== data.index && animate !== false) {
+		if (animate !== false && index !== data.index && index > 0 && index < data.pageCount) {
 			data.$roller.trigger("update.roller", [ index ]);
+
+			data.index = index;
 		}
-		data.index = index;
 
 		_updateControls(data);
 	}
