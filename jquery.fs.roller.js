@@ -1,5 +1,5 @@
 /* 
- * Roller v3.1.12 - 2014-08-18 
+ * Roller v3.1.13 - 2014-08-19 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -637,7 +637,7 @@
 			}
 		}
 
-		if (animate !== false && index !== data.index && index > 0 && index < data.pageCount) {
+		if (animate !== false && index !== data.index && index > -1 && index < data.pageCount) {
 			data.$roller.trigger("update.roller", [ index ]);
 
 			data.index = index;
