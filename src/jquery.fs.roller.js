@@ -229,6 +229,11 @@
 					}
 
 					data.maxMove = -data.canisterWidth + data.viewportWidth + data.itemMargin;
+
+					if (data.canisterWidth + data.maxMove > data.viewportWidth) {
+						data.pageCount++;
+					}
+
 					if (data.maxMove >= 0) {
 						data.maxMove = 0;
 						data.pageCount = 1;
@@ -629,9 +634,8 @@
 			}
 		}
 
-		if (animate !== false && index !== data.index && index > -1 && index < data.pageCount) {
+		if (animate !== false && index !== data.index && index > -1 && index <= data.pageCount) {
 			data.$roller.trigger("update.roller", [ index ]);
-
 			data.index = index;
 		}
 
