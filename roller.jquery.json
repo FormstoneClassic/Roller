@@ -1,6 +1,6 @@
 {
   "name": "roller",
-  "version": "3.1.15",
+  "version": "3.1.16",
   "title": "Roller",
   "author": {
     "name": "Ben Plum",
@@ -24,12 +24,11 @@
     "ui",
     "javascript",
     "jquery",
-    "formstone",
-    "benplum"
+    "formstone"
   ],
   "docs": "http://formstone.it/roller/",
   "demo": "http://formstone.it/roller/",
-  "download": "https://github.com/benplum/Roller",
-  "bugs": "https://github.com/benplum/Roller/issues",
+  "download": "https://github.com/Formstone/Roller",
+  "bugs": "https://github.com/Formstone/Roller/issues",
   "homepage": "http://formstone.it/roller/"
 }
