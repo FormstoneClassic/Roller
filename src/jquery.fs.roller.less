@@ -1,0 +1,72 @@
+ 	.roller {
+ 		width: 100%;
+
+ 		* {
+			-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+			-webkit-touch-callout: none;
+			user-select: none;
+		}
+
+		&,
+		.roller-viewport {
+			position: relative;
+		}
+
+		.roller-canister {
+			margin: 0;
+			overflow: hidden;
+			position: relative;
+			transition: transform 0.4s ease;
+			transform: translate3d(0, 0, 0);
+		}
+
+		.roller-item {
+			float: left; margin: 0;
+		}
+
+		.roller-canister,
+		.roller-item {
+			backface-visibility: hidden;
+		}
+
+		// Controls & Pagination
+		.roller-controls,
+		.roller-pagination {
+			display: none;
+			margin: 0;
+			padding: 0;
+			width: 100%;
+		}
+
+		.roller-controls.visible,
+		.roller-pagination.visible {
+			display: block;
+		}
+
+		.roller-control {
+			cursor: default;
+		}
+
+		.roller-page,
+		.roller-control.enabled {
+			cursor: pointer;
+		}
+
+		// Captions
+		.roller-caption {
+			display: none;
+		}
+
+		.roller-caption.active {
+			display: block;
+		}
+
+		// Single
+		&.single .roller-item {
+			display: none;
+		}
+
+		&.single .roller-item.active {
+			display: block;
+		}
+	}

@@ -230,9 +230,12 @@
 
 					data.maxMove = -data.canisterWidth + data.viewportWidth + data.itemMargin;
 
+					/*
+					// breaks inifinite scroll
 					if (data.canisterWidth + data.maxMove > data.viewportWidth) {
 						data.pageCount++;
 					}
+					*/
 
 					if (data.maxMove >= 0) {
 						data.maxMove = 0;
@@ -634,7 +637,7 @@
 			}
 		}
 
-		if (animate !== false && index !== data.index && index > -1 && index < data.pageCount) {
+		if (animate !== false && index !== data.index && (data.infinite || (index > -1 && index < data.pageCount)) ) {
 			data.$roller.trigger("update.roller", [ index ]);
 			data.index = index;
 		}
