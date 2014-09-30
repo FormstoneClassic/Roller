@@ -239,7 +239,7 @@
 
 					if (data.maxMove >= 0) {
 						data.maxMove = 0;
-						data.pageCount = 1;
+						data.pageCount = 0; // hope this works :P
 					}
 
 					// Reset Page Count
