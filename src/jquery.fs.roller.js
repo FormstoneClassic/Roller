@@ -251,7 +251,7 @@
 						data.$pagination.html(html);
 					}
 
-					if (data.pageCount <= 1) {
+					if (data.pageCount < 1) {
 						data.$controls.removeClass("visible");
 						data.$pagination.removeClass("visible");
 					} else {
@@ -660,7 +660,7 @@
 
 		if (data.infinite) {
 			data.$controlItems.addClass("enabled");
-		} else if (data.pageCount <= 1) {
+		} else if (data.pageCount < 1) {
 			data.$controlItems.removeClass("enabled");
 		} else {
 			data.$controlItems.addClass("enabled");
