@@ -7,4 +7,4 @@ A jQuery plugin for simple content carousels. Part of the Formstone Library.
 - [Documentation](http://formstone.it/roller/) 
 
 #### Bower Support 
-`bower install Roller`
+`bower install Roller` 
