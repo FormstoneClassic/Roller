@@ -80,6 +80,10 @@
 							data.$canister.attr("style", null);
 						}
 					}
+					
+					if (data.autoWidth) {
+						data.$items.css("width","");
+					}
 
 					data.$items.removeClass("visible");
 
