@@ -82,6 +82,10 @@
 						}
 					}
 
+					if (data.autoWidth) {
+						data.$items.css("width", "");
+					}
+
 					data.$items.removeClass("visible first");
 
 					if (data.pagination) {

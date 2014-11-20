@@ -1,5 +1,9 @@
 /* 
+<<<<<<< HEAD
  * Roller v3.2.7 - 2014-12-18 
+=======
+ * Roller v3.2.4 - 2014-11-20 
+>>>>>>> 022a3d5... remove autoWidth CSS width when using destroy method
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -88,6 +92,10 @@
 						} else {
 							data.$canister.attr("style", null);
 						}
+					}
+					
+					if (data.autoWidth) {
+						data.$items.css("width","");
 					}
 
 					data.$items.removeClass("visible first");
