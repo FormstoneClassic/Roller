@@ -1,5 +1,5 @@
 /* 
- * Roller v3.2.5 - 2014-11-21 
+ * Roller v3.2.5 - 2014-11-24 
  * A jQuery plugin for simple content carousels. Part of the Formstone Library. 
  * http://formstone.it/roller/ 
  * 
@@ -33,6 +33,7 @@
 		autoWidth: false,
 		controls: true,
 		customClass: "",
+		extraMargin: 0,
 		infinite: false,
 		labels: {
 			next: "Next",
@@ -88,12 +89,8 @@
 							data.$canister.attr("style", null);
 						}
 					}
-					
-					if (data.autoWidth) {
-						data.$items.css("width","");
-					}
 
-					data.$items.removeClass("visible");
+					data.$items.removeClass("visible first");
 
 					if (data.pagination) {
 						data.$pagination.remove();
@@ -199,7 +196,9 @@
 		 */
 		resize: function() {
 			return $(this).each(function() {
-				var data = $(this).data("roller");
+				var data = $(this).data("roller"),
+					i,
+					$i;
 
 				if (data && data.enabled) {
 					data.count = data.$items.length;
@@ -208,45 +207,95 @@
 						return;
 					}
 
-					data.viewportWidth = data.$viewport.outerWidth(false);
-					data.itemMargin = parseInt(data.$items.eq(0).css("margin-left"), 10) + parseInt(data.$items.eq(0).css("margin-right"), 10);
+					data.$roller.removeClass("animated");
+					data.$items.removeClass("visible first");
 
+					data.viewportWidth = data.$viewport.outerWidth(false);
+
+					// auto width
 					if (data.autoWidth) {
+						// autowidth = paged
+						data.paged = true;
 						data.$items.css({ width: data.viewportWidth });
 					}
 
+					// Cache items
+					data.items = [];
+					for (i = 0; i < data.count; i++) {
+						$i = data.$items.eq(i);
+						data.items.push({
+							$item:    $i,
+							width:    $i.outerWidth(true),
+							position: $i.position()
+						});
+					}
+
 					if (data.single) {
+						// single
 						data.perPage = 1;
 						data.pageCount = data.count - 1;
-					} else if (data.paged) {
-						data.canisterWidth = 0;
-						for (var i = 0; i < data.count; i++) {
-							data.canisterWidth += data.$items.eq(i).outerWidth() + data.itemMargin;
-						}
-						data.perPage = 1;
-						data.pageCount = (data.canisterWidth > data.viewportWidth) ? data.count - 1 : 0;
 					} else {
-						data.itemWidth = data.$items.eq(0).outerWidth(false) + data.itemMargin;
-						data.perPage = Math.floor(data.viewportWidth / data.itemWidth);
-						if (data.perPage < 1) {
+
+						data.canisterWidth = 0;
+						for (i = 0; i < data.count; i++) {
+							data.canisterWidth += data.items[i].width;
+						}
+
+						if (data.paged) {
+							// paged
 							data.perPage = 1;
+							data.pageCount = (data.canisterWidth > data.viewportWidth) ? data.count - 1 : 0;
+						} else {
+							data.perPage = 1;
+							data.pageCount = 0;
+							// initial page
+							data.pages = [{
+								left: 0
+							}];
+
+							var totalWidth = data.extraMargin,
+								pageWidth = totalWidth,
+								pageStart = 0,
+								pageEnd = 0;
+
+							for (i = 0; i < data.count; i++) {
+								pageWidth += data.items[i].width;
+
+								// if this item won't fit, reset
+								if (pageWidth > data.viewportWidth) {
+									// create new page
+									data.pages.push({
+										left: totalWidth
+									});
+
+									// cache page items
+									data.pages[ data.pageCount ].$items = data.$items.slice(pageStart, pageEnd);
+									data.pageCount++;
+
+									// current page width
+									pageWidth = data.extraMargin + data.items[i].width;
+									pageStart = i;
+								}
+								pageEnd++;
+
+								totalWidth += data.items[i].width;
+							}
+
+							// cache last page items
+							data.pages[ data.pageCount ].$items = data.$items.slice(pageStart, pageEnd);
 						}
-						data.pageCount = Math.ceil(data.count / data.perPage) - 1;
-						if (data.count > data.perPage && data.pageCount === 1) {
-							data.pageCount++;
-						}
-						data.pageMove = data.itemWidth * data.perPage;
-						data.canisterWidth = data.itemWidth * data.count;
 					}
 
-					data.maxMove = -data.canisterWidth + data.viewportWidth + data.itemMargin;
+					// NEW
+					data.canisterWidth += data.extraMargin;
 
-					/*
-					// breaks inifinite scroll
-					if (data.canisterWidth + data.maxMove > data.viewportWidth) {
-						data.pageCount++;
+					if (data.single || data.paged) {
+						data.maxMove = -data.canisterWidth + data.viewportWidth - data.extraMargin;
+					} else {
+						data.maxMove = -data.pages[ data.pageCount ].left;
 					}
-					*/
+
+					console.log(data);
 
 					if (data.maxMove >= 0) {
 						data.maxMove = 0;
@@ -262,6 +311,7 @@
 						data.$pagination.html(html);
 					}
 
+					// update pagination
 					if (data.pageCount < 1) {
 						data.$controls.removeClass("visible");
 						data.$pagination.removeClass("visible");
@@ -271,11 +321,19 @@
 					}
 					data.$paginationItems = data.$roller.find(".roller-page");
 
+					// update canister
 					if (!data.single) {
 						data.$canister.css({ width: data.canisterWidth });
 					}
 
+					// update item positions
+					for (i = 0; i < data.count; i++) {
+						data.items[i].position = data.$items.eq(i).position();
+					}
+
 					_position(data, _calculateIndex(data), false);
+
+					data.$roller.addClass("animated");
 				}
 			});
 		},
@@ -293,6 +351,22 @@
 				if (data && data.enabled) {
 					data.$items = data.$roller.find(".roller-item");
 					pub.resize.apply(data.$roller);
+				}
+			});
+		},
+
+		/**
+		 * @method private (for now)
+		 * @name set
+		 * @description Set option for instances
+		 * @example $(".target").roller("set", "option", "value");
+		 */
+		set: function(option, value) {
+			return $(this).each(function() {
+				var data = $(this).data("roller");
+
+				if (data && data[option]) {
+					data[option] = value;
 				}
 			});
 		}
@@ -604,16 +678,17 @@
 					   .addClass("active");
 		} else {
 			if (data.paged) {
-				var offset = data.$items.eq(index).position();
-				if (offset) {
-					data.leftPosition = -offset.left;
-				}
+				data.leftPosition = -data.items[index].position.left;
 			} else {
-				data.leftPosition = -(index * data.pageMove);
+				data.leftPosition = -data.pages[index].left + data.extraMargin;
 			}
 
 			if (data.leftPosition < data.maxMove) {
 				data.leftPosition = data.maxMove;
+			}
+
+			if (data.leftPosition > 0) {
+				data.leftPosition = 0;
 			}
 
 			if (isNaN(data.leftPosition)) {
@@ -635,17 +710,15 @@
 					data.$canister.css( _prefix("transform", "translate3d("+data.leftPosition+"px, 0, 0)") );
 				}
 			}
-		}
 
-		data.$items.removeClass("visible");
-		if (!data.single && data.perPage !== Infinity) {
-			for (var i = 0; i < data.perPage; i++) {
-				if (data.leftPosition === data.maxMove) {
-					data.$items.eq(data.count - 1 - i).addClass("visible");
-				} else {
-					data.$items.eq((data.perPage * index) + i).addClass("visible");
-				}
+			// Update classes
+			data.$items.removeClass("visible first");
+			if (data.paged) {
+				data.$items.eq(index).addClass("visible");
+			} else {
+				data.pages[index].$items.addClass("visible");
 			}
+			data.$items.filter(".visible").eq(0).addClass("first");
 		}
 
 		if (animate !== false && index !== data.index && (data.infinite || (index > -1 && index <= data.pageCount)) ) {

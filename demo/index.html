@@ -36,6 +36,13 @@
 			.demo .rolled.single .roller-pagination { clear: both; }
 
 			.demo .rolled .roller-page.active { color: #000; }
+
+			.demo .rolled.extra .roller-item {
+				/* width: 200px; */
+				-webkit-transition: margin 0.4s ease;
+						transition: margin 0.4s ease;
+			}
+			.demo .rolled.extra .roller-item.first { margin-left: 200px; }
 		</style>
 
 		<script>
@@ -250,6 +257,35 @@
 
 				<h5>Demo</h5>
 				<div class="rolled" data-roller-options='{"minWidth":"740px"}'>
+					<div class="roller-item">
+						1
+					</div>
+					<div class="roller-item">
+						2
+					</div>
+					<div class="roller-item">
+						3
+					</div>
+					<div class="roller-item">
+						4
+					</div>
+					<div class="roller-item">
+						5
+					</div>
+				</div>
+
+				<br>
+
+				<!-- EXTRA WIDTH -->
+				<h2>Extra Width</h2>
+				<p>:</p>
+
+				<pre class="example"><code class="language-javascript">$(".target").roller({
+	extraMargin: 200
+});</code></pre>
+
+				<h5>Demo</h5>
+				<div class="rolled extra" data-roller-options='{"extraMargin":200}'>
 					<div class="roller-item">
 						1
 					</div>
