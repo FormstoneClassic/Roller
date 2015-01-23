@@ -453,7 +453,7 @@
 				hasTouched: false
 			}, opts);
 
-			data.$items = (data.single) ? data.$roller.find(".roller-item") : data.$canister.children(".roller-item");
+			data.$items = (data.single) ? data.$roller.find(".roller-item") : data.$canister.find(".roller-item").not(".roller-item .roller-item");
 			data.$captionItems = data.$captions.find(".roller-caption");
 			data.$controlItems = data.$controls.find(".roller-control");
 			data.$paginationItems = data.$pagination.find(".roller-page");
