@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Formstone/Roller"
+    "url": "https://github.com/FormstoneClassic/Roller"
   },
-  "homepage": "http://formstone.it/roller/",
-  "demo": "http://formstone.it/components/Roller/demo/index.html",
+  "homepage": "http://classic.formstone.it/roller/",
+  "demo": "http://classic.formstone.it/components/Roller/demo/index.html",
   "license": "MIT",
   "author": {
     "name": "Ben Plum",
