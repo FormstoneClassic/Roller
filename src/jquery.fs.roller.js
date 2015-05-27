@@ -240,7 +240,7 @@
 						if (data.paged) {
 							// paged
 							data.perPage = 1;
-							data.pageCount = (data.canisterWidth > data.viewportWidth) ? data.count - 1 : 0;
+							data.pageCount = (data.canisterWidth + data.extraMargin > data.viewportWidth) ? data.count - 1 : 0;
 						} else {
 							data.perPage = 1;
 							data.pageCount = 0;
